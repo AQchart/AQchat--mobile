@@ -1,0 +1,73 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	export default {
+		props: {
+			customClass: {
+				type: String,
+				default: ''
+			},
+			visiable: {
+				type: Boolean,
+				required: true,
+				default: false
+			},
+			title: {
+				type: String,
+				default: ''
+			},
+			width: {
+				type: String,
+				default: '50%'
+			},
+			fullscreen: {
+				type: Boolean,
+				default: false
+			},
+		},
+		data() {
+			return {
+
+			}
+		},
+		created() {
+			console.log(this.fullscreen);
+		},
+		methods: {
+
+		}
+	}
+
+
+function GenSrcComponentsAqDialogRender(): VNode | null {
+const _ctx = this
+const _cache = this.$.renderCache
+  return withDirectives(createElementVNode("view", utsMapOf({ class: "overlay" }), [
+    createElementVNode("view", utsMapOf({
+      class: "dialog-wapper",
+      style: normalizeStyle( _ctx.fullscreen ? utsMapOf({ width: '100%', height: '140%' }) : utsMapOf<string, any | null>({}))
+    }), [
+      createElementVNode("view", utsMapOf({
+        class: "dialog-close",
+        "hover-class": "dialog-close-hover"
+      }), [
+        createElementVNode("text", utsMapOf({ class: "text" }), "X")
+      ]),
+      createElementVNode("view", utsMapOf({ class: "dialog-body" }))
+    ], 4 /* STYLE */)
+  ], 512 /* NEED_PATCH */), [
+    [vShow, _ctx.visiable]
+  ])
+}
+const GenSrcComponentsAqDialogStyles = [utsMapOf([["overlay", padStyleMapOf(utsMapOf([["position", "fixed"], ["backgroundColor", "rgba(0,0,0,0.4)"], ["zIndex", 2000], ["width", "100%"], ["height", "100%"], ["bottom", 0]]))], ["dialog-wapper", utsMapOf([[".overlay ", utsMapOf([["position", "relative"], ["!backgroundColor", "#ffffff"], ["zIndex", 2001], ["width", "500rpx"], ["minHeight", 50], ["left", "50%"], ["top", "30%"], ["transform", "translate(-50%, -50%)"]])]])], ["dialog-close-hover", utsMapOf([[".overlay .dialog-wapper ", utsMapOf([["backgroundColor", "#000000"]])]])], ["dialog-close", utsMapOf([[".overlay .dialog-wapper ", utsMapOf([["zIndex", 2002], ["position", "fixed"], ["right", "20rpx"], ["top", "20rpx"], ["width", "40rpx"], ["height", "40rpx"], ["alignItems", "center"], ["justifyContent", "center"], ["backgroundColor", "#ff5500"], ["borderRadius", "50rpx"]])]])], ["text", utsMapOf([[".overlay .dialog-wapper .dialog-close ", utsMapOf([["textAlign", "center"], ["lineHeight", "40rpx"], ["color", "#000000"]])]])]])]

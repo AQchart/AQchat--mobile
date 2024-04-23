@@ -1,4 +1,4 @@
-<script lang="uts">
+
 	let firstBackTime = 0
 	export default {
 		onLaunch: function () {
@@ -10,7 +10,7 @@
 		onHide: function () {
 			console.log('App Hide')
 		},
-		// #ifdef APP-ANDROID
+
 		onLastPageBackPress: function () {
 			console.log('App LastPageBackPress')
 			if (firstBackTime == 0) {
@@ -27,12 +27,11 @@
 				uni.exit()
 			}
 		},
-		// #endif
+
 		onExit: function () {
 			console.log('App Exit')
 		},
 	}
-</script>
 
-<style lang="scss">
-</style>
+
+const GenAppStyles = []

@@ -4,11 +4,16 @@
 		<view class="text-area">
 			<text class="title">{{title}}</text>
 		</view>
+		<aq-dialog :visiable="true" :fullscreen="true"></aq-dialog>
 	</view>
 </template>
 
-<script>
+<script lang="uts">
+	import aqDialog from '../../src/components/aq-dialog.uvue'
 	export default {
+		components: {
+			aqDialog
+		},
 		data() {
 			return {
 				title: 'Hello'
