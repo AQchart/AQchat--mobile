@@ -4,14 +4,29 @@
 		<view class="text-area">
 			<text class="title">{{title}}</text>
 		</view>
+		<u-action-sheet :list="list" v-model="show"></u-action-sheet>
+		<u-icon name="photo"></u-icon>
 	</view>
 </template>
 
 <script>
 	export default {
-		data() {
+		data() { 
 			return {
-				title: 'Hello'
+				title: 'Hello',
+				list: [{
+						text: '点赞',
+						color: 'blue',
+						fontSize: 28
+					},
+					{
+						text: '分享'
+					},
+					{
+						text: '评论'
+					}
+				],
+				show: true
 			}
 		},
 		onLoad() {
@@ -23,7 +38,7 @@
 	}
 </script>
 
-<style>
+<style lang="scss">
 	.content {
 		display: flex;
 		flex-direction: column;
