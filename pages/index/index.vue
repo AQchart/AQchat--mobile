@@ -1,6 +1,6 @@
 <template>
 	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
+		<image class="logo" src="@/static/logo.png"></image>
 		<view class="text-area">
 			<text class="title">{{title}}</text>
 		</view>
@@ -13,12 +13,7 @@
 <script>
 	export default {
 		data() {
-		data() { 
-
-
-
 			return {
-				title: 'Hello'
 				title: 'Hello',
 				list: [{
 						text: '测试',
@@ -26,10 +21,10 @@
 						fontSize: 28
 					},
 					{
-						text: 1
+						text: '111'
 					},
 					{
-						text: 111
+						text: '111'
 					}
 				],
 				show: true
@@ -43,8 +38,6 @@
 		}
 	}
 </script>
-
-<style>
 <style lang="scss">
 	.content {
 		display: flex;
@@ -71,5 +64,4 @@
 		font-size: 36rpx;
 		color: #8f8f94;
 	}
-</style>
 </style>
