@@ -4,6 +4,7 @@
 		<view class="text-area">
 			<text class="title">{{title}}</text>
 		</view>
+
 		<u-action-sheet :list="list" v-model="show"></u-action-sheet>
 		<u-icon name="photo"></u-icon>
 	</view>
@@ -11,19 +12,24 @@
 
 <script>
 	export default {
+		data() {
 		data() { 
+
+
+
 			return {
+				title: 'Hello'
 				title: 'Hello',
 				list: [{
-						text: '点赞',
+						text: '测试',
 						color: 'blue',
 						fontSize: 28
 					},
 					{
-						text: '分享'
+						text: 1
 					},
 					{
-						text: '评论'
+						text: 111
 					}
 				],
 				show: true
@@ -38,6 +44,7 @@
 	}
 </script>
 
+<style>
 <style lang="scss">
 	.content {
 		display: flex;
@@ -64,4 +71,5 @@
 		font-size: 36rpx;
 		color: #8f8f94;
 	}
+</style>
 </style>
