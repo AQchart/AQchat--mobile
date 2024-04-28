@@ -101,5 +101,10 @@
         "enable" : false
     },
     "vueVersion" : "3",
-    "locale" : "auto"
+    "locale" : "auto",
+    "h5" : {
+        "router" : {
+            "mode" : "history"
+        }
+    }
 }

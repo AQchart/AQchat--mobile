@@ -1,7 +1,7 @@
 .light-theme {
   --bg-color: #fff;
   --txt-color: #2c3e50;
-  --ad-shadow:#ededed;
+  --ad-shadow: #ededed;
   --im-content-shadow1: #f5f5f5;
   --im-content-shadow2: #ffffff;
   --im-content-bg1: #e6e6e6;
@@ -11,6 +11,7 @@
   --im-list-avatar-bg2:#e6e6e6;
   --im-list-avatar-shadow1:#b5b5b5;
   --im-list-avatar-shadow2:#ffffff;
+  --switch-color: #000;
 }
 
 .dark-theme {
@@ -26,4 +27,5 @@
   --im-list-avatar-bg2:#272a30;
   --im-list-avatar-shadow1:#1f2126;
   --im-list-avatar-shadow2:#373d44;
+  --switch-color: #000;
 }

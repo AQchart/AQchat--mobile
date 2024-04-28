@@ -3,13 +3,20 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "AQChart首页"
+			}
+		},
+		{
+			"path" : "pages/start/index",
+			"style" : 
+			{
+				"navigationBarTitleText" : "AQChart开始"
 			}
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
+		"navigationBarTitleText": "AQChartMobile",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8",
 		"navigationStyle": "custom",

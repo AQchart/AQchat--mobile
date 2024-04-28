@@ -25,8 +25,8 @@
 		font-style: normal;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
-
-		::v-deep .u-switch__node {
+		::v-deep .node-class {
+			color: var(--switch-color) !important;
 			&:before {
 				content: "\e6b6";
 				position: absolute;
@@ -43,8 +43,8 @@
 		font-style: normal;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
-
 		::v-deep .node-class {
+			color: var(--switch-color) !important;
 			&:before {
 				content: "\e62e";
 				position: absolute;
