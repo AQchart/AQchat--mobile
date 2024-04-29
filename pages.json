@@ -12,6 +12,12 @@
 			{
 				"navigationBarTitleText" : "AQChart开始"
 			}
+		},
+		{
+			"path": "pages/im/index",
+			"style": {
+				"navigationBarTitleText" : "AQChart聊天"
+			}
 		}
 	],
 	"globalStyle": {

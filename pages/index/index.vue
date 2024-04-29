@@ -74,6 +74,7 @@
 		flex-direction: column;
 		align-items: left;
 		justify-content: center;
+		color: var(--txt-color);
 
 		.theme-btn {
 			padding: 10px 0px 5px 10px;

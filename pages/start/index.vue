@@ -19,7 +19,7 @@
 			</u-col>
 		</u-row>
 		<u-row class="start-btn">
-			<button class="login" @click="enterChatFun">
+			<button :class="appStore.websocketStatus ? 'login': 'login login-disable'" @click="toLogin">
 				进入聊天室
 				<svg fill="currentColor" viewBox="0 0 24 24" class="icon">
 					<path clip-rule="evenodd"
@@ -32,17 +32,20 @@
 </template>
 
 <script setup lang="ts">
+	import { ref, onMounted } from 'vue'
 	import useStart from "../hook/useStart"
 	import lottie from '../components/lottie.vue'
-	import LottieReload from "/assets/json/lottie-reload.json";
-	import { ref, onMounted } from 'vue'
+	import LottieReload from '../../assets/json/lottie-reload.json';
+	import { useAppStore } from '../../store/modules/app'
+	const appStore = useAppStore()
 	const uformRef = ref(null)
 	const {
 		step,
 		userForm,
 		reloadLoading,
 		toStartFun,
-		reloadFun
+		reloadFun,
+		enterChatFun
 	} = useStart()
 
 	const rules = {
@@ -56,10 +59,10 @@
 		}]
 	}
 
-	const enterChatFun = () => {
+	const toLogin = () => {
 		uformRef.value.validate(vaild => {
 			if (vaild) {
-				// TODO 进入聊天室
+				enterChatFun()
 			}
 		})
 	}
@@ -72,7 +75,7 @@
 <style lang="scss">
 	.user-info {
 		width: 100%;
-		margin-top: 30%;
+		padding-top: 30%;
 
 		.user-avatar-row {
 			.user-avatar {
@@ -166,7 +169,7 @@
 				}
 			}
 
-			.login-fail {
+			.login-disable {
 				cursor: not-allowed;
 				background-color: #ccc;
 			}
