@@ -1,9 +1,10 @@
 <template>
-	<view>用户页面</view>
+	<view>聊天页面</view>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 </script>
 
 <style lang="scss">
+	
 </style>

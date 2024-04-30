@@ -6,13 +6,21 @@ interface UserInfo {
 	userAvatar : String
 }
 
+interface RoomInfo {
+	roomId : string,
+	roomNo : number,
+	roomName : string,
+}
+
+
 interface AppState {
 	websocketStatus : boolean,
 	userInfo : UserInfo,
-	themeDark : boolean
+	themeDark : boolean,
+	roomInfo : RoomInfo
 }
-
 export const useAppStore = defineStore('app', {
+	unistorage: true, // 是否持久化
 	state: () : AppState => ({
 		websocketStatus: false,
 		userInfo: {
@@ -20,7 +28,12 @@ export const useAppStore = defineStore('app', {
 			userName: '',
 			userAvatar: ''
 		},
-		themeDark: uni.getStorageSync('app-darkTheme') || false
+		themeDark: false,
+		roomInfo: {
+			roomId: '',
+			roomNo: null,
+			roomName: '',
+		}
 	}),
 	getters: {
 		theme: (state) => state.themeDark,
@@ -28,7 +41,6 @@ export const useAppStore = defineStore('app', {
 	actions: {
 		setTheme(theme : boolean) {
 			this.themeDark = theme
-			uni.setStorageSync('app-darkTheme', theme)
 		},
 		setUserInfo(userInfo : UserInfo) {
 			this.userInfo = userInfo
@@ -36,11 +48,8 @@ export const useAppStore = defineStore('app', {
 		setWebsocketStatus(status : boolean) {
 			this.websocketStatus = status
 		},
-	},
-	persist: {
-		storage: {
-			getItem: uni.getStorageSync,
-			setItem: uni.setStorageSync
+		setRoomInfo(info: RoomInfo) {
+			this.roomInfo = info
 		}
-	},
+	}
 })

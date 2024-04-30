@@ -1,11 +1,3 @@
-/*
- * @Author: howcode 1051495009@qq.com
- * @Date: 2024-04-22 20:26:00
- * @LastEditors: howcode 1051495009@qq.com
- * @LastEditTime: 2024-04-22 22:44:47
- * @Description: 
- */
-
 import { ref, reactive, onMounted } from 'vue'
 import multiavatar from "@multiavatar/multiavatar/esm"
 import AQSender from '../../common/sockets/AQSender'

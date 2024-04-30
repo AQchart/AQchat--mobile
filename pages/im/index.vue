@@ -1,19 +1,13 @@
 <template>
 	<view class="im-page">
-		<component :is="currentComponent == 0 ? chatPage: userPage"></component>
-		<!-- <tabbar @switchTab="switchTab"></tabbar> -->
+		<avatar></avatar>
+		<chat-start></chat-start>
 	</view>
 </template>
 
 <script setup lang="ts">
-	import { ref } from 'vue'
-	import tabbar from './layout/tabbar.vue'
-	import chatPage from './layout/chat_page.vue'
-	import userPage from './layout/user_page.vue'
-	const currentComponent = ref(0)
-	const switchTab = (page : number) => {
-		currentComponent.value = page
-	}
+	import avatar from './layout/avatar.vue'
+	import chatStart from './layout/chatStart.vue'
 </script>
 
 <style lang="scss">

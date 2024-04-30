@@ -18,6 +18,12 @@
 			"style": {
 				"navigationBarTitleText" : "AQChart聊天"
 			}
+		},
+		{
+			"path": "pages/im/room",
+			"style": {
+				"navigationBarTitleText" : "AQChart群聊"
+			}
 		}
 	],
 	"globalStyle": {

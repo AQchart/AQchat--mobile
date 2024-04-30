@@ -40,4 +40,8 @@
 		background-color: var(--bg-color);
 		color: var(--txt-color);
 	}
+
+	uni-toast {
+		z-index: 20000;
+	}
 </style>

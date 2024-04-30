@@ -1,6 +1,8 @@
 import * as Pinia from 'pinia';
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+import { createUnistorage } from '/uni_modules/pinia-plugin-unistorage'
+
 const pinia = Pinia.createPinia()
-pinia.use(piniaPluginPersistedstate)
+pinia.use(createUnistorage())
 
 export default pinia

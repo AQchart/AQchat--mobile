@@ -1,19 +1,29 @@
 <template>
 	<view class="chat-page">
 		<view class="large-btn">
-			<view class="custom-icon icon-create">
+			<view class="custom-icon icon-create" @click="createRoom">
 				<span>创建群聊</span>
 			</view>
 		</view>
 		<view class="large-btn">
-			<view class="custom-icon icon-add">
+			<view class="custom-icon icon-add" @click="joinRoom">
 				<span>加入群聊</span>
 			</view>
 		</view>
+		<room-dialog ref="roomDialogRef"></room-dialog>
 	</view>
 </template>
 
 <script setup lang="ts">
+	import { ref } from 'vue'
+	import roomDialog from './roomDialog.vue'
+	const roomDialogRef = ref(null)
+	const joinRoom = () => {
+		roomDialogRef.value.show(false)
+	}
+	const createRoom = () => {
+		roomDialogRef.value.show(true)
+	}
 </script>
 
 <style lang="scss" scoped>
@@ -38,9 +48,11 @@
 				position: relative;
 				box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.5);
 				color: var(--bg-color);
+
 				&:hover {
 					box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.2);
 				}
+
 				span {
 					position: absolute;
 					font-size: 16px;
