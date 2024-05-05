@@ -38,7 +38,7 @@
 	/*每个页面公共css */
 	#app {
 		background-color: var(--bg-color);
-		color: var(--txt-color);
+		color: var(--txt-color) !important;
 	}
 
 	uni-toast {

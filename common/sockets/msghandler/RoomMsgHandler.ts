@@ -82,7 +82,7 @@ class BroadcastMsgAckHandler {
 			return;
 		}
 		return {
-			user: msgAck.getUserid(),
+			user: msgAck.getUser(),
 			roomId: msgAck.getRoomid(),
 			msgId: msgAck.getMsgid(),
 			msgType: msgAck.getMsgtype(),
@@ -109,5 +109,6 @@ export {
 	JoinRoomNotifyHandler,
 	LeaveRoomAckHandler,
 	SendMsgAckHandler,
-	BroadcastMsgAckHandler
+	BroadcastMsgAckHandler,
+	SyncChatRecordAckHandler
 }

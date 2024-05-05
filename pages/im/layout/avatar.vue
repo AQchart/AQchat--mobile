@@ -17,7 +17,7 @@
 		const hours = new Date().getHours()
 		daySpace.value = (hours >= 6 && hours < 10) ? "早上好" :
 			(hours >= 10 && hours < 12) ? "中午好" :
-				(hours >= 12 && hours < 18) ? "晚上好" : "深夜了"
+				(hours >= 12 && hours < 18) ? "下午好" : "晚上好"
 	}
 
 	onMounted(() => {
@@ -43,7 +43,7 @@
 			height: 50px;
 			position: relative;
 			z-index: 1;
-			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.8);
+			box-shadow: 0 2px 12px 0 var(--avatar-shadow);
 			border-radius: 50px;
 		}
 
@@ -63,7 +63,7 @@
 			overflow: hidden;
 			white-space: nowrap;
 			text-overflow: ellipsis;
-			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.5);
+			box-shadow: 0 2px 12px 0 var(--user-name-shadow);
 		}
 
 		.empty {

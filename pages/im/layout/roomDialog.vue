@@ -14,11 +14,10 @@
 
 <script setup lang="ts">
 	import { ref, reactive, defineExpose, nextTick } from 'vue';
+	import useRoom from '../hook/useRoom'
 	const created = ref(false);
 	const showPopup = ref(false);
 	const formDataRef = ref(null);
-
-	import useRoom from '../hook/useRoom'
 
 
 	const {

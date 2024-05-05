@@ -15,7 +15,7 @@ export default () => {
 		roomName : string
 	}
 	const roomForm = reactive<RoomForm>({
-		roomNo: undefined,
+		roomNo: 0,
 		roomName: ''
 	})
 	const reloadLoading = ref(true)

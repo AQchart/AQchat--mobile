@@ -17,7 +17,8 @@ interface AppState {
 	websocketStatus : boolean,
 	userInfo : UserInfo,
 	themeDark : boolean,
-	roomInfo : RoomInfo
+	roomInfo : RoomInfo,
+	msgQueue: any[] 
 }
 export const useAppStore = defineStore('app', {
 	unistorage: true, // 是否持久化
@@ -31,9 +32,10 @@ export const useAppStore = defineStore('app', {
 		themeDark: false,
 		roomInfo: {
 			roomId: '',
-			roomNo: null,
+			roomNo: 0,
 			roomName: '',
-		}
+		},
+		msgQueue: []
 	}),
 	getters: {
 		theme: (state) => state.themeDark,
@@ -50,6 +52,10 @@ export const useAppStore = defineStore('app', {
 		},
 		setRoomInfo(info: RoomInfo) {
 			this.roomInfo = info
+		},
+		pushMessage(msg: any) {
+			this.msgQueue.push(msg)
+			console.log(this.msgQueue)
 		}
 	}
 })

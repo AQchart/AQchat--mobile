@@ -7,7 +7,7 @@
 import * as AQChatMSg from '../protocol/AQChatMsgProtocol_pb';
 import GetStsAckHandler from './GetStsAckHandler';
 import UserLoginAckHandler from './UserLoginAckHandler';
-import { CreateRoomAckHandler, JoinRoomAckHandler, JoinRoomNotifyHandler } from './RoomMsgHandler'
+import { CreateRoomAckHandler, JoinRoomAckHandler, JoinRoomNotifyHandler, SyncChatRecordAckHandler, BroadcastMsgAckHandler, SendMsgAckHandler } from './RoomMsgHandler'
 import ErrorHandler from './ErrorHandler'
 
 export default class AQMsgHandlerFactory {
@@ -26,6 +26,9 @@ export default class AQMsgHandlerFactory {
 		this.handlerMap[msgCommand.JOIN_ROOM_ACK] = new JoinRoomAckHandler();
 		this.handlerMap[msgCommand.JOIN_ROOM_NOTIFY] = new JoinRoomNotifyHandler();
 		this.handlerMap[msgCommand.EXCEPTION_MSG] = new ErrorHandler();
+		this.handlerMap[msgCommand.SEND_MSG_ACK] = new SendMsgAckHandler();
+		this.handlerMap[msgCommand.BROADCAST_MSG_ACK] = new BroadcastMsgAckHandler();
+		this.handlerMap[msgCommand.SYNC_CHAT_RECORD_ACK] = new SyncChatRecordAckHandler();
     }
 
     handle(msgCommand:number, msgBody: any) {
