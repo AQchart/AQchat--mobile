@@ -23,7 +23,6 @@
 	.text-message {
 		width: calc(100% - 20px);
 		border-radius: 10px;
-		background-color: var(--text-message-bg);
 		color: var(--text-message-color);
 	}
 	

@@ -1,16 +1,27 @@
 <template>
-	<view class="chat-room">
-		<view class="message-content">
-			<render-msg v-for="(msg, index) in msgList" :key="index" :message="msg"
-				:currentUser="appStore.userInfo"></render-msg>
-		</view>
-		<view class="message-input">
-			<u-field placeholder="在此输入消息" v-model="msgStr">
-				<template v-slot:right>
-					<u-button type="success" @click="sendTextMsg" size="mini">发送</u-button>
-					<u-icon @click="showOther" name="plus"></u-icon>
-				</template>
-			</u-field>
+	<view class="chat">
+		<scroll-view :style="{height: `${windowHeight}rpx`}" id="scrollview" scroll-y="true" :scroll-top="scrollTop"
+			:scroll-with-animation="true" class="scroll-view">
+			<!-- 聊天主体 -->
+			<view id="msglistview" class="chat-body">
+				<!-- 聊天记录 -->
+				<render-msg class="item" v-for="(msg, index) in msgList" :key="index" :message="msg"
+					:currentUser="appStore.userInfo"></render-msg>
+			</view>
+		</scroll-view>
+		<!-- 底部消息发送栏 -->
+		<!-- 用来占位，防止聊天消息被发送框遮挡 -->
+		<view class="chat-bottom">
+			<view class="send-msg">
+				<view class="uni-textarea">
+					<textarea v-model="msgStr" maxlength="300" :show-confirm-bar="false" auto-height></textarea>
+				</view>
+				<view class="send-btn">
+					<u-icon @click="showEmoji()" custom-prefix="custom-icon" name=" icon-emoji" class="plus"></u-icon>
+					<u-icon @click="showOther()" v-if="!showSend" name="plus" class="plus"></u-icon>
+					<button @click="sendTextMsg" v-if="showSend" class="send">发送</button>
+				</view>
+			</view>
 		</view>
 		<view v-if="otherShow" class="message-other"></view>
 	</view>
@@ -28,16 +39,38 @@
 		reciveMessageFun
 	} = useChart()
 
+	const scrollTop = ref(0)
+
 	const otherShow = ref(false)
+	
+	const emojiShow = ref(false)
 
 	const msgStr = ref('')
 
 	const showOther = () => {
 		otherShow.value = true
 	}
+	
+	const showEmoji = () => {
+		emojiShow.value = true
+	}
 
 	const msgList = computed(() => {
 		return appStore.msgQueue
+	})
+	
+	const showSend = computed(() => {
+		return msgStr.value.length > 0
+	})
+
+	const rpxTopx = (px : number) => {
+		let deviceWidth = wx.getSystemInfoSync().windowWidth
+		let rpx = (750 / (deviceWidth - 30)) * Number(px)
+		return Math.floor(rpx)
+	}
+
+	const windowHeight = computed(() => {
+		return rpxTopx(uni.getSystemInfoSync().windowHeight)
 	})
 
 	// 发送文本消息
@@ -74,28 +107,116 @@
 	})
 </script>
 
-<style lang="scss">
-	.chat-room {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		top: 0px;
-		left: 0px;
-		background-color: #fccdfc;
+<style lang="scss" scoped>
+	$chatContentbgc: #C2DCFF;
+	$sendBtnbgc: #4F7DF5;
 
-		.message-content {
-			position: absolute;
-			left: 0px;
-			top: 0px;
-			padding: 5px 5px 0px 5px;
-			overflow-y: auto;
-			overflow-x: hidden;
+	view,
+	button,
+	text,
+	input,
+	textarea {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
 
-			.message-item {}
+	/* 聊天消息 */
+	.chat {
+		.scroll-view {
+			::-webkit-scrollbar {
+				display: none;
+				width: 0 !important;
+				height: 0 !important;
+				-webkit-appearance: none;
+				background: transparent;
+				color: transparent;
+			}
+
+			// background-color: orange;
+			background-color: #F6F6F6;
+
+			.chat-body {
+				display: flex;
+				flex-direction: column;
+				padding-top: 23rpx;
+				
+				.item {
+					margin-top: 10px;
+					&:first-child {
+						margin-top: 5px;
+					}
+				}
+			}
 		}
 
-		.message-input {}
+		/* 底部聊天发送栏 */
+		.chat-bottom {
+			width: 100%;
+			background: #F4F5F7;
 
-		.message-other {}
+			.send-msg {
+				display: flex;
+				align-items: flex-end;
+				padding: 16rpx 30rpx;
+				width: 100%;
+				position: fixed;
+				bottom: 0;
+				background: #EDEDED;
+			}
+
+			.uni-textarea {
+				textarea {
+					width: 500rpx;
+					min-height: 75rpx;
+					max-height: 500rpx;
+					background: #FFFFFF;
+					border-radius: 8rpx;
+					font-size: 32rpx;
+					font-family: PingFang SC;
+					color: #333333;
+					line-height: 43rpx;
+					padding: 5rpx 8rpx;
+				}
+			}
+
+			.send-btn {
+				display: flex;
+				flex: 0 0 auto;
+				margin-left: 25rpx;
+				height: 75rpx;
+				.send {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 108rpx;
+					height: 65rpx;
+					margin-left: 5px;
+					background: $sendBtnbgc;
+					border-radius: 8rpx;
+					font-size: 28rpx;
+					font-family: PingFang SC;
+					font-weight: 500;
+					color: #FFFFFF;
+					line-height: 28rpx;
+				}
+				.plus {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 65rpx;
+					height: 65rpx;
+					margin-left: 5px;
+					background: $sendBtnbgc;
+					border-radius: 50rpx;
+					font-size: 28rpx;
+					font-family: PingFang SC;
+					font-weight: 500;
+					color: #FFFFFF;
+					line-height: 28rpx;
+				}
+			}
+		}
+
 	}
 </style>

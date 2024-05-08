@@ -4,6 +4,7 @@
 
 import * as AQChatMSg from '../protocol/AQChatMsgProtocol_pb';
 import AQSender from '../AQSender';
+import UserLoginAckHandler from './UserLoginAckHandler'
 
 // 加入房间ack处理器
 class JoinRoomAckHandler {
@@ -41,7 +42,7 @@ class JoinRoomNotifyHandler {
 			return;
 		}
 		return {
-			user: msgAck.getUser(),
+			user: new UserLoginAckHandler().handle(msgAck.getUser()),
 			roomId: msgAck.getRoomid(),
 		}
 	}
@@ -82,7 +83,7 @@ class BroadcastMsgAckHandler {
 			return;
 		}
 		return {
-			user: msgAck.getUser(),
+			user: new UserLoginAckHandler().handle(msgAck.getUser()),
 			roomId: msgAck.getRoomid(),
 			msgId: msgAck.getMsgid(),
 			msgType: msgAck.getMsgtype(),

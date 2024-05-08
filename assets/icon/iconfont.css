@@ -12,6 +12,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-emoji:before {
+  content: "\e60a";
+}
+
 .icon-create:before {
   content: "\e615";
 }
@@ -35,4 +39,3 @@
 .icon-light:before {
   content: "\e769";
 }
-

@@ -7,14 +7,14 @@
 	<view class="message-item" :class="currentUser == message.user.userId ? 'right': 'left'">
 		<view class="avatar" v-if="currentUser != message.user.userId" v-html="message.user.userAvatar"></view>
 		<view class="message-box">
-			<component :is="getMessageType()" :v-bind="getProps()"></component>
+			<component :is="getMessageType()" v-bind="getProps"></component>
 		</view>
 		<view class="avatar" v-if="currentUser == message.user.userId" v-html="message.user.userAvatar"></view>
 	</view>
 </template>
 
 <script lang="ts" setup>
-	import { ref, defineProps } from 'vue'
+	import { defineProps, onMounted, computed } from 'vue'
 	import text from './text.vue'
 	import image from './image.vue'
 	import voice from './voice.vue'
@@ -56,7 +56,7 @@
 	}
 
 	// 获取消息组件props
-	const getProps = () => {
+	const getProps = computed(() => {
 		switch (message.msgType) {
 			case messageType.text:
 				return { text: message.msg }
@@ -69,7 +69,12 @@
 			default:
 				return {}
 		}
-	}
+	})
+	
+	onMounted(() => {
+		console.log(currentUser)
+		console.log(message)
+	})
 </script>
 
 <style lang="scss" scoped>
@@ -83,16 +88,21 @@
 
 		.avatar {
 			flex: 0 0 auto;
-			width: 50px;
-			height: 50px;
+			width: 60rpx;
+			height: 60rpx;
 			position: relative;
-			z-index: 1;
+			// z-index: 0;
 			box-shadow: 0 2px 12px 0 var(--avatar-shadow);
 			border-radius: 50px;
 		}
 
 		.message-box {
 			flex: 1 1 auto;
+			background-color: var(--text-message-bg);
+			margin-right: 10px;
+			margin-left: 10px;
+			border-radius: 5px;
+			padding: 10px;
 		}
 	}
 
