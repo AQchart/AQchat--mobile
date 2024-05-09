@@ -379,14 +379,19 @@
 						display: flex;
 						align-items: center;
 						justify-content: center;
+						flex-wrap: wrap;
 						cursor: pointer;
 						transition: all 0.2s ease 0s;
 						.u-icon {
-							width: 100rpx;
-							height: 100rpx;
+							flex: 1;
+							font-size: 100rpx;
+							flex-basis: 100rpx;
+							justify-content: center;
 						}
 						span {
-							
+							flex: 1;
+							flex-basis: 100rpx;
+							text-align: center;
 						}
 					}
 				
