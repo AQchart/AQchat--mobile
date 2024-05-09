@@ -7,22 +7,24 @@
 			}
 		},
 		{
-			"path" : "pages/start/index",
-			"style" : 
-			{
-				"navigationBarTitleText" : "AQChart开始"
+			"path": "pages/start/index",
+			"style": {
+				"navigationBarTitleText": "AQChart开始"
 			}
 		},
 		{
 			"path": "pages/im/index",
 			"style": {
-				"navigationBarTitleText" : "AQChart聊天"
+				"navigationBarTitleText": "AQChart聊天"
 			}
 		},
 		{
 			"path": "pages/im/room",
 			"style": {
-				"navigationBarTitleText" : "AQChart群聊"
+				"navigationBarTitleText": "AQChart群聊"
+			},
+			"usingComponents": {
+				"editor": "dynamicLib://editorLib/editor"
 			}
 		}
 	],
@@ -33,7 +35,7 @@
 		"backgroundColor": "#F8F8F8",
 		"navigationStyle": "custom",
 		"app-plus": {
-			"titleView":false
+			"titleView": false
 		}
 	},
 	"uniIdRouter": {}

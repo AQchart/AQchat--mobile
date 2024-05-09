@@ -66,7 +66,7 @@ export default () => {
 			}
 		}
 		//注册获取sts回调函数
-		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.JOIN_ROOM_ACK, (res) => { joinRoomAck(res) });
+		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.JOIN_ROOM_ACK, (res: any) => { joinRoomAck(res) });
 		const message = new AQChatMSg.default.JoinRoomCmd()
 		message.setRoomno(roomForm.roomNo)
 		AQSender.getInstance().sendMsg(

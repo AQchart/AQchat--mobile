@@ -4,12 +4,13 @@
 */
 
 <template>
-	<view class="message-item" :class="currentUser == message.user.userId ? 'right': 'left'">
-		<view class="avatar" v-if="currentUser != message.user.userId" v-html="message.user.userAvatar"></view>
-		<view class="message-box">
+	<view class="message-item"
+		:class="currentUser.userId == message.user.userId ? 'right flex-right': 'left flex-left'">
+		<view class="avatar" v-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
+		<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
 			<component :is="getMessageType()" v-bind="getProps"></component>
 		</view>
-		<view class="avatar" v-if="currentUser == message.user.userId" v-html="message.user.userAvatar"></view>
+		<view class="avatar" v-if="currentUser.userId == message.user.userId" v-html="message.user.userAvatar"></view>
 	</view>
 </template>
 
@@ -34,7 +35,7 @@
 		},
 		currentUser: {
 			type: Object,
-			default: undefined
+			default: {}
 		}
 	})
 
@@ -70,26 +71,32 @@
 				return {}
 		}
 	})
-	
+
 	onMounted(() => {
-		console.log(currentUser)
-		console.log(message)
+		console.log(currentUser.userId)
+		console.log(message.user.userId)
 	})
 </script>
 
 <style lang="scss" scoped>
+	.flex-left {
+		justify-content: flex-start;
+	}
+
+	.flex-right {
+		justify-content: flex-end;
+	}
+
 	.message-item {
 		border-radius: 10px;
 		position: relative;
 		display: flex;
 		flex-direction: row;
-		justify-content: center;
-
 
 		.avatar {
-			flex: 0 0 auto;
-			width: 60rpx;
-			height: 60rpx;
+			display: flex;
+			width: 80rpx;
+			height: 80rpx;
 			position: relative;
 			// z-index: 0;
 			box-shadow: 0 2px 12px 0 var(--avatar-shadow);
@@ -97,20 +104,60 @@
 		}
 
 		.message-box {
-			flex: 1 1 auto;
+			display: flex;
 			background-color: var(--text-message-bg);
-			margin-right: 10px;
-			margin-left: 10px;
+			margin-right: 20px;
+			margin-left: 20px;
 			border-radius: 5px;
 			padding: 10px;
+			color: var(--text-message-color);
+			font-size: 32rpx;
+			font-family: PingFang SC;
+			font-weight: 500;
+			max-width: 486rpx;
+			word-wrap: break-word;
+			view {
+				flex: auto;
+				max-width: 486rpx;
+				word-wrap: break-word;
+			}
+
+		}
+
+		.right-after {
+			&::after {
+				position: absolute;
+				display: inline-block;
+				content: '';
+				width: 0;
+				height: 0;
+				left: 602rpx;
+				top: 28px;
+				border: 12rpx solid transparent;
+				border-left: 20rpx solid var(--text-message-bg);
+			}
+		}
+
+		.left-after {
+			&::after {
+				position: absolute;
+				display: inline-block;
+				content: '';
+				width: 0;
+				height: 0;
+				top: 28px;
+				right: 602rpx;
+				border: 12rpx solid transparent;
+				border-right: 20rpx solid var(--text-message-bg);
+			}
 		}
 	}
 
 	.left {
-		left: 5px;
+		left: 10rpx;
 	}
 
 	.right {
-		right: 5px;
+		right: 10rpx;
 	}
 </style>

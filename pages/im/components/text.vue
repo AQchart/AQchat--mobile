@@ -1,5 +1,5 @@
 <template>
-	<view class="text-message">{{ text }}</view>
+	<view class="text-message" v-html="text"></view>
 </template>
 
 <script lang="ts" setup>
