@@ -29,11 +29,11 @@
 			<scroll-view :style="{height: `200rpx`}" class="other-scroll-view" id="other-scroll-view" scroll-y="true"
 				:scroll-with-animation="true">
 				<ul>
-					<li>
+					<li @click="uploadImage">
 						<u-icon name="photo"></u-icon>
 						<span>图片</span>
 					</li>
-					<li>
+					<li @click="uploadVideo">
 						<u-icon name="camera-fill"></u-icon>
 						<span>视频</span>
 					</li>
@@ -59,6 +59,8 @@
 	import { useAppStore } from '../../store/modules/app'
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
+	import { OssHelper } from '../../common/sockets/utils/OssHelper'
+	import AQChatMsgProtocol_pb, * as AQChatMSg from '../../common/sockets/protocol/AQChatMsgProtocol_pb';
 	const appStore = useAppStore()
 
 	const {
@@ -96,16 +98,56 @@
 		const context = uni.createSelectorQuery().select('#editor').context
 		if (editorCtx.value != null) {
 			editorCtx.value.insertImage(imgObject)
+		} else {
+			uni.showToast({
+				title: "选择表情失败",
+				icon: 'none'
+			})
 		}
 	}
 
 	const onEditorInput = (e : any) => {
+		if (e.detail.html == '<p><br></p>' && e.detail.text == '\n') {
+			msgStr.value = ''
+			return
+		}
 		msgStr.value = e.detail.html
+	}
+
+	// 上传图片
+	const uploadImage = () => {
+		uni.chooseImage({
+			count: 1, //默认9
+			sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
+			sourceType: ['album'], //从相册选择
+			success: async function (res : any) {
+				const result = await OssHelper.getInstance().uploadFile(res.tempFiles[0], AQChatMSg.default.MsgType.IMAGE)
+				console.log(result)
+				if (result && result.res.status == 200) {
+					sendMessage(AQChatMSg.default.MsgType.IMAGE, result.url)
+					scrollToBottom()
+				}
+			}
+		});
+	}
+
+	// 上传视频
+	const uploadVideo = () => {
+		uni.chooseVideo({
+			sourceType: ['camera', 'album'],
+			success: async function (res : any) {
+				const result = await OssHelper.getInstance().uploadFile(res.tempFile, AQChatMSg.default.MsgType.VIDEO)
+				if (result && result.res.status == 200) {
+					sendMessage(AQChatMSg.default.MsgType.VIDEO, result.url)
+					scrollToBottom()
+				}
+			}
+		});
 	}
 
 	const onEditorReady = () => {
 		editorReadOny.value = false
-		uni.createSelectorQuery().select('#editor').context((res) => {
+		uni.createSelectorQuery().select('#editor').context((res: any) => {
 			editorCtx.value = res.context
 		}).exec()
 	}
@@ -187,8 +229,13 @@
 		uni.setNavigationBarTitle({
 			title: appStore.roomInfo.roomName
 		})
+		console.log(msgList.value)
 		setTimeout(() => {
 			scrollToBottom()
+			OssHelper.getInstance().init(AQChatMSg.default.MsgType.IMAGE, () => { })
+		}, 500)
+		setTimeout(() => {
+			OssHelper.getInstance().init(AQChatMSg.default.MsgType.VIDEO, () => { })
 		}, 500)
 	})
 </script>
@@ -270,6 +317,7 @@
 					color: var(--input-text-color);
 					line-height: 43rpx;
 					padding: 5rpx 8rpx;
+					box-shadow: rgba(50, 50, 93, 0.1) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.1) 0px 18px 36px -18px inset;
 				}
 			}
 
@@ -367,36 +415,43 @@
 					}
 				}
 			}
-			
+
 			.other-scroll-view {
 				ul {
 					padding: 8px;
 					display: flex;
 					flex-wrap: wrap;
-				
+
 					li {
-						margin: 9px;
+						margin: 8px;
 						display: flex;
 						align-items: center;
 						justify-content: center;
 						flex-wrap: wrap;
 						cursor: pointer;
 						transition: all 0.2s ease 0s;
+						box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+						background-color: #fff;
+						color: #000;
+						border-radius: 20rpx;
+						padding: 9rpx;
+
 						.u-icon {
 							flex: 1;
-							font-size: 100rpx;
-							flex-basis: 100rpx;
+							font-size: 90rpx;
+							flex-basis: 90rpx;
 							justify-content: center;
 						}
+
 						span {
 							flex: 1;
-							flex-basis: 100rpx;
+							flex-basis: 90rpx;
 							text-align: center;
 						}
 					}
-				
+
 					li:hover {
-						transform: scale(1.2);
+						box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
 					}
 				}
 			}
