@@ -3,25 +3,25 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "AQChart首页"
+				"navigationBarTitleText": "AQChat首页"
 			}
 		},
 		{
 			"path": "pages/start/index",
 			"style": {
-				"navigationBarTitleText": "AQChart开始"
+				"navigationBarTitleText": "AQChat开始"
 			}
 		},
 		{
 			"path": "pages/im/index",
 			"style": {
-				"navigationBarTitleText": "AQChart聊天"
+				"navigationBarTitleText": "AQChat聊天"
 			}
 		},
 		{
 			"path": "pages/im/room",
 			"style": {
-				"navigationBarTitleText": "AQChart群聊"
+				"navigationBarTitleText": "AQChat群聊"
 			},
 			"usingComponents": {
 				"editor": "dynamicLib://editorLib/editor"
