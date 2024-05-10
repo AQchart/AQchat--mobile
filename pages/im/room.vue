@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 	import renderMsg from './components/render-msg.vue'
-	import { ref, onMounted, computed } from 'vue'
+	import { ref, onMounted, computed, watch } from 'vue'
 	import { useAppStore } from '../../store/modules/app'
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
@@ -95,9 +95,13 @@
 			width: '30rpx',
 			height: '30rpx'
 		}
-		const context = uni.createSelectorQuery().select('#editor').context
 		if (editorCtx.value != null) {
 			editorCtx.value.insertImage(imgObject)
+			editorCtx.value.getContents({
+				success: (res: any) => {
+					msgStr.value = res.html
+				}
+			})
 		} else {
 			uni.showToast({
 				title: "选择表情失败",
@@ -139,7 +143,6 @@
 				const result = await OssHelper.getInstance().uploadFile(res.tempFile, AQChatMSg.default.MsgType.VIDEO)
 				if (result && result.res.status == 200) {
 					sendMessage(AQChatMSg.default.MsgType.VIDEO, result.url)
-					scrollToBottom()
 				}
 			}
 		});
@@ -147,7 +150,7 @@
 
 	const onEditorReady = () => {
 		editorReadOny.value = false
-		uni.createSelectorQuery().select('#editor').context((res: any) => {
+		uni.createSelectorQuery().select('#editor').context((res : any) => {
 			editorCtx.value = res.context
 		}).exec()
 	}
@@ -163,25 +166,28 @@
 		return appStore.msgQueue
 	})
 
+	watch(appStore.msgQueue, () => {
+		console.log("watch")
+		scrollToBottom()
+	})
+
 	const showSend = computed(() => {
 		return msgStr.value.length > 0
 	})
 
 	const rpxTopx = (px : number) => {
-		let deviceWidth = wx.getSystemInfoSync().windowWidth
-		let rpx = (750 / (deviceWidth - 30)) * Number(px)
-		return Math.floor(rpx)
+		return uni.upx2px(px)
 	}
 
 	const windowHeight = computed(() => {
 		let px = uni.getSystemInfoSync().windowHeight;
-		if (emojiShow.value || emojiShow.value) {
-			px = px + rpxTopx(75)
+		if (emojiShow.value || otherShow.value) {
+			px = rpxTopx(px) - 90
 		}
 		else {
-			px = px + rpxTopx(25)
+			px = rpxTopx(px) - 75
 		}
-		return rpxTopx(px)
+		return px * 3.3
 	})
 
 	// 滚动至聊天底部
@@ -192,10 +198,12 @@
 			query.select('#msglistview').boundingClientRect();
 			query.exec((res) => {
 				if (res[1].height > res[0].height) {
-					scrollTop.value = rpxTopx(res[1].height - res[0].height)
+					scrollTop.value = (emojiShow.value || otherShow.value) ? rpxTopx(res[1].height) + 260 : rpxTopx(res[1].height) + 260 * 3
+				}else {
+					scrollTop.value = (emojiShow.value || otherShow.value) ? rpxTopx(res[0].height) + 260 : rpxTopx(res[0].height) + 260 * 3
 				}
 			})
-		}, 15)
+		}, 50)
 	}
 
 	// 发送文本消息
@@ -208,9 +216,6 @@
 			return
 		}
 		sendMessage(0, msgStr.value)
-		msgStr.value = ''
-		editorCtx.value.clear({})
-		scrollToBottom()
 	}
 
 	// 组装和发送消息
@@ -221,6 +226,8 @@
 			msg: msg
 		}
 		sendMessageFun(data)
+		msgStr.value = ''
+		editorCtx.value.clear({})
 	}
 
 	onMounted(() => {
