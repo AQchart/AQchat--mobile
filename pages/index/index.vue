@@ -28,7 +28,7 @@
 	import { ref } from 'vue'
 	import theme from '../components/theme.vue'
 	import lottie from '../components/lottie.vue'
-	import LottieChat from '../../assets/json/lottie-chat.json';
+	import LottieChat from '/static/assets/json/lottie-chat.json';
 	import useTyping from '../hook/usePrinter'
 
 	const text = ref('一个极速、便捷的在线匿名聊天室')

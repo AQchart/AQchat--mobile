@@ -21,9 +21,12 @@
 
 <style lang="scss">
 	.text-message {
-		width: calc(100% - 20px);
 		border-radius: 10px;
 		color: var(--text-message-color);
+		
+		::v-deep * {
+			white-space: wrap;
+		}
 	}
 	
 </style>

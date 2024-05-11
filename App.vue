@@ -31,9 +31,9 @@
 </script>
 
 <style lang="scss">
-	@import './assets/style/theme.scss';
-	@import './assets/style/animation.scss';
-	@import './assets/icon/iconfont.css';
+	@import '/static/assets/style/theme.scss';
+	@import '/static/assets/style/animation.scss';
+	@import '/static/assets/icon/iconfont.css';
 
 	/*每个页面公共css */
 	#app {

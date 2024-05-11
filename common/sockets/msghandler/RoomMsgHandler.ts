@@ -70,7 +70,7 @@ class SendMsgAckHandler {
 		return {
 			userId: msgAck.getUserid(),
 			roomId: msgAck.getRoomid(),
-			success: msgAck.getSuccess(),
+			status: msgAck.getStatus(),
 			msgId: msgAck.getMsgid()
 		}
 	}
@@ -98,8 +98,10 @@ class SyncChatRecordAckHandler {
 		if (msgAck == null) {
 			return;
 		}
+		const handler = new BroadcastMsgAckHandler()
+		let r : AQChatMSg.default.ChatRecord[] = msgAck.getChatrecordsList()
 		return {
-			chatRecords: msgAck.getChatrecordsList()
+			chatRecords: r.map(it => handler.handle(it) )
 		}
 	}
 }

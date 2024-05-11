@@ -76,6 +76,7 @@ export default () => {
 		);
 	}
 
+
 	return {
 		step,
 		userForm,

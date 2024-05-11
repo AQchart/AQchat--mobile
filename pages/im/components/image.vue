@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-	import { ref, defineProps, computed, withModifiers } from 'vue'
+	import { ref, defineProps } from 'vue'
 	const props = defineProps({
 		src: {
 			type: String,

@@ -21,7 +21,7 @@
 	@font-face {
 		font-family: "iconfont";
 		/* Project id  */
-		src: url('/assets/fonts/iconfont.ttf?t=1714124436680') format('truetype');
+		src: url('/static/assets/fonts/iconfont.ttf?t=1714124436680') format('truetype');
 	}
 
 

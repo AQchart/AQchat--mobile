@@ -35,7 +35,7 @@
 	import { ref, onMounted } from 'vue'
 	import useStart from "../hook/useStart"
 	import lottie from '../components/lottie.vue'
-	import LottieReload from '../../assets/json/lottie-reload.json';
+	import LottieReload from '/static/assets/json/lottie-reload.json';
 	import { useAppStore } from '../../store/modules/app'
 	const appStore = useAppStore()
 	const uformRef = ref(null)
@@ -86,6 +86,7 @@
 
 		.user-name {
 			margin-top: 20px;
+
 			.user-name-input {
 				outline: none;
 				border: none;
@@ -99,6 +100,7 @@
 				::v-deep .uni-input-input {
 					text-align: center;
 				}
+
 				::v-deep .uni-input-placeholder {
 					text-align: center;
 				}

@@ -19,7 +19,7 @@
 	import { ref } from 'vue'
 	import roomDialog from './roomDialog.vue'
 	import lottie from "../../components/lottie.vue";
-	import lottieContent from "../../../assets/json/lottie-content.json";
+	import lottieContent from '/static/assets/json/lottie-content.json';
 	
 	const roomDialogRef = ref(null)
 	const joinRoom = () => {

@@ -14,9 +14,8 @@
 		<view class="chat-bottom">
 			<view class="send-msg" :class="(otherShow || emojiShow) ? 'send-msg-other': 'send-msg-only'">
 				<view class="uni-textarea">
-					<editor id="editor" class="ql-container" placeholder="输入内容..." @input="onEditorInput"
-						:read-only="editorReadOny" @ready="onEditorReady">
-					</editor>
+					<imEditor ref="editorRef" class="im-container" placeholder="输入内容..." @input="onEditorInput">
+					</imEditor>
 				</view>
 				<view class="send-btn">
 					<u-icon @click="showEmoji()" custom-prefix="custom-icon" name=" icon-emoji" class="emoji"></u-icon>
@@ -55,18 +54,25 @@
 
 <script setup lang="ts">
 	import renderMsg from './components/render-msg.vue'
+	import imEditor from './layout/editor.vue'
 	import { ref, onMounted, computed, watch } from 'vue'
 	import { useAppStore } from '../../store/modules/app'
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
 	import { OssHelper } from '../../common/sockets/utils/OssHelper'
+	import Snowflake from './hook/CustomSnowflake'
 	import AQChatMsgProtocol_pb, * as AQChatMSg from '../../common/sockets/protocol/AQChatMsgProtocol_pb';
 	const appStore = useAppStore()
 
 	const {
 		sendMessageFun,
-		reciveMessageFun
+		reciveMessageFun,
+		RecoverUserFun,
+		asyncRoomMessageFun
 	} = useChart()
+
+
+	const snowFake = new Snowflake(2)
 
 	const scrollTop = ref(0)
 
@@ -74,9 +80,9 @@
 
 	const emojiShow = ref(false)
 
-	const msgStr = ref('')
+	const editorRef = ref(null)
 
-	const editorReadOny = ref(true)
+	const msgStr = ref('')
 
 	const showOther = () => {
 		otherShow.value = !otherShow.value
@@ -84,8 +90,6 @@
 			emojiShow.value = false
 		}
 	}
-
-	const editorCtx = ref(null)
 
 
 	const selectIcon = (icon : any) => {
@@ -95,13 +99,8 @@
 			width: '30rpx',
 			height: '30rpx'
 		}
-		if (editorCtx.value != null) {
-			editorCtx.value.insertImage(imgObject)
-			editorCtx.value.getContents({
-				success: (res: any) => {
-					msgStr.value = res.html
-				}
-			})
+		if (editorRef.value != null) {
+			editorRef.value.insertImage(imgObject)
 		} else {
 			uni.showToast({
 				title: "选择表情失败",
@@ -110,12 +109,8 @@
 		}
 	}
 
-	const onEditorInput = (e : any) => {
-		if (e.detail.html == '<p><br></p>' && e.detail.text == '\n') {
-			msgStr.value = ''
-			return
-		}
-		msgStr.value = e.detail.html
+	const onEditorInput = (html : any) => {
+		msgStr.value = html
 	}
 
 	// 上传图片
@@ -147,14 +142,6 @@
 			}
 		});
 	}
-
-	const onEditorReady = () => {
-		editorReadOny.value = false
-		uni.createSelectorQuery().select('#editor').context((res : any) => {
-			editorCtx.value = res.context
-		}).exec()
-	}
-
 	const showEmoji = () => {
 		emojiShow.value = !emojiShow.value
 		if (emojiShow.value) {
@@ -167,7 +154,6 @@
 	})
 
 	watch(appStore.msgQueue, () => {
-		console.log("watch")
 		scrollToBottom()
 	})
 
@@ -199,11 +185,37 @@
 			query.exec((res) => {
 				if (res[1].height > res[0].height) {
 					scrollTop.value = (emojiShow.value || otherShow.value) ? rpxTopx(res[1].height) + 260 : rpxTopx(res[1].height) + 260 * 3
-				}else {
+				} else {
 					scrollTop.value = (emojiShow.value || otherShow.value) ? rpxTopx(res[0].height) + 260 : rpxTopx(res[0].height) + 260 * 3
 				}
 			})
 		}, 50)
+	}
+	
+	// 恢复用户信息
+	const RecoverUser = () => {
+		uni.showModal({
+			title: '提示',
+			content: '长时间未活动，服务器已断开连接，是否恢复连接',
+			cancelText: '是',
+			confirmText: '否',
+			success(res) {
+				if (res.confirm) {
+					RecoverUserFun()
+				} else {
+					appStore.clearAll()
+					uni.navigateTo({
+						url: '/pages/index/index'
+					})
+				}
+			},
+			fail() {
+				appStore.clearAll()
+				uni.navigateTo({
+					url: '/pages/index/index'
+				})
+			}
+		})
 	}
 
 	// 发送文本消息
@@ -223,16 +235,26 @@
 		const data = {
 			roomId: appStore.roomInfo.roomId,
 			msgType: type,
-			msg: msg
+			msg: msg,
+			msgId: snowFake.nextId()
 		}
 		sendMessageFun(data)
 		msgStr.value = ''
-		editorCtx.value.clear({})
+		editorRef.value.clear()
 	}
+	
+	
+	watch(appStore.websocketStatus, (value: boolean) => {
+		if(!value) {
+			RecoverUser()
+		}
+	})
 
 	onMounted(() => {
 		// 注册消息回调
 		reciveMessageFun()
+		let message = new AQChatMSg.default.SyncChatRecordCmd([appStore.roomInfo.roomId])
+		asyncRoomMessageFun(message)
 		uni.setNavigationBarTitle({
 			title: appStore.roomInfo.roomName
 		})
@@ -312,7 +334,7 @@
 			}
 
 			.uni-textarea {
-				.ql-container {
+				.im-container {
 					width: 500rpx;
 					height: auto;
 					min-height: 75rpx;

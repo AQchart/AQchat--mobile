@@ -7,8 +7,11 @@
 	<view class="message-item"
 		:class="currentUser.userId == message.user.userId ? 'right flex-right': 'left flex-left'">
 		<view class="avatar" v-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
-		<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
-			<component :is="getMessageType()" v-bind="getProps"></component>
+		<view class="message">
+			<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">{{ message.user.userName }}</view>
+			<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
+				<component :is="getMessageType()" v-bind="getProps"></component>
+			</view>
 		</view>
 		<view class="avatar" v-if="currentUser.userId == message.user.userId" v-html="message.user.userAvatar"></view>
 	</view>
@@ -73,8 +76,6 @@
 	})
 
 	onMounted(() => {
-		console.log(currentUser.userId)
-		console.log(message.user.userId)
 	})
 </script>
 
@@ -98,57 +99,62 @@
 			width: 80rpx;
 			height: 80rpx;
 			position: relative;
-			// z-index: 0;
 			box-shadow: 0 2px 12px 0 var(--avatar-shadow);
 			border-radius: 50px;
 		}
 
-		.message-box {
+		.message {
 			display: flex;
-			background-color: var(--text-message-bg);
 			margin-right: 20px;
 			margin-left: 20px;
-			border-radius: 5px;
-			padding: 10px;
-			color: var(--text-message-color);
-			font-size: 32rpx;
-			font-family: PingFang SC;
-			font-weight: 500;
-			max-width: 486rpx;
-			word-wrap: break-word;
-			view {
-				flex: auto;
+			flex-direction: column;
+
+			.message-box {
+				margin-top: 5px;
+				background-color: var(--text-message-bg);
+				border-radius: 5px;
+				padding: 10px;
+				color: var(--text-message-color);
+				font-size: 32rpx;
+				font-family: PingFang SC;
+				font-weight: 500;
 				max-width: 486rpx;
 				word-wrap: break-word;
+
+				view {
+					flex: auto;
+					max-width: 486rpx;
+					word-wrap: break-word;
+				}
+
 			}
 
-		}
-
-		.right-after {
-			&::after {
-				position: absolute;
-				display: inline-block;
-				content: '';
-				width: 0;
-				height: 0;
-				left: 602rpx;
-				top: 28px;
-				border: 12rpx solid transparent;
-				border-left: 20rpx solid var(--text-message-bg);
+			.right-after {
+				&::after {
+					position: absolute;
+					display: inline-block;
+					content: '';
+					width: 0;
+					height: 0;
+					left: 602rpx;
+					top: 45px;
+					border: 12rpx solid transparent;
+					border-left: 20rpx solid var(--text-message-bg);
+				}
 			}
-		}
 
-		.left-after {
-			&::after {
-				position: absolute;
-				display: inline-block;
-				content: '';
-				width: 0;
-				height: 0;
-				top: 28px;
-				right: 602rpx;
-				border: 12rpx solid transparent;
-				border-right: 20rpx solid var(--text-message-bg);
+			.left-after {
+				&::after {
+					position: absolute;
+					display: inline-block;
+					content: '';
+					width: 0;
+					height: 0;
+					top: 45px;
+					right: 602rpx;
+					border: 12rpx solid transparent;
+					border-right: 20rpx solid var(--text-message-bg);
+				}
 			}
 		}
 	}

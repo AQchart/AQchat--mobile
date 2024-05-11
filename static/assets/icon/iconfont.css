@@ -1,8 +1,8 @@
 @font-face {
   font-family: "custom-icon"; /* Project id 4519359 */
-  src: url('../fonts/iconfont.woff2?t=1714358501021') format('woff2'),
-       url('../fonts/iconfont.woff?t=1714358501021') format('woff'),
-       url('../fonts/iconfont.ttf?t=1714358501021') format('truetype');
+    src: url('../fonts/iconfont.woff2?t=1715415426417') format('woff2'),
+         url('../fonts/iconfont.woff?t=1715415426417') format('woff'),
+         url('../fonts/iconfont.ttf?t=1715415426417') format('truetype');
 }
 
 .custom-icon {
@@ -10,6 +10,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-meeting:before {
+  content: "\e64a";
+}
+
+.icon-join:before {
+  content: "\e606";
 }
 
 .icon-emoji:before {
