@@ -1,7 +1,7 @@
 /*
  * @Author: zsdddz
  * @Date: 2024-04-21 00:40:59
- * @LastEditTime: 2024-04-22 23:06:49
+ * @LastEditTime: 2024-05-29 17:12:19
  */
 
 
@@ -54,7 +54,7 @@ export default class AQSender {
      * @param funCallback 回调函数
      */
     connect(funCallback: () => void): void {
-        let strURL = `wss://${SERVER_HOST}`;
+        let strURL = `ws://${SERVER_HOST}`;
         console.log(`准备连接服务器, URL = ${strURL}`);
 
         let oWebSocket = new w3cwebsocket(strURL);
