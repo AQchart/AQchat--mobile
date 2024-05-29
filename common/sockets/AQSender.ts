@@ -15,25 +15,25 @@ const SERVER_HOST = import.meta.env.VITE_SOCKET_API;
 
 
 export default class AQSender {
-    /**
-    * 单例对象
-    */
-    private static _oInstance: AQSender = new AQSender();
-
-    /**
-     * WebSocket
-     */
-    private _oWebSocket: w3cwebsocket | null = null;
-
-    /**
-     * 消息编码器
-     */
-    private readonly _oMsgEncoder: AQMsgEncoder = new AQMsgEncoder();
-
-    /**
-     * 消息解码器
-     */
-    private readonly _oMsgDecoder: AQMsgDecoder = new AQMsgDecoder();
+     /**
+        * 单例对象
+        */
+        private static instance: AQSender = new AQSender();
+    
+        /**
+         * WebSocket
+         */
+        private webSocket: w3cwebsocket | null = null;
+    
+        /**
+         * 消息编码器
+         */
+        private readonly msgEncoder: AQMsgEncoder = new AQMsgEncoder();
+    
+        /**
+         * 消息解码器
+         */
+        private readonly msgDecoder: AQMsgDecoder = new AQMsgDecoder();
 
     /**
      * 私有化类默认构造器
@@ -45,7 +45,7 @@ export default class AQSender {
      * 获取单例对象
      */
     static getInstance(): AQSender {
-        return AQSender._oInstance;
+        return AQSender.instance;
     }
 
     /**
@@ -54,7 +54,7 @@ export default class AQSender {
      * @param funCallback 回调函数
      */
     connect(funCallback: () => void): void {
-        let strURL = `ws://${SERVER_HOST}`;
+        let strURL = `wss://${SERVER_HOST}`;
         console.log(`准备连接服务器, URL = ${strURL}`);
 
         let oWebSocket = new w3cwebsocket(strURL);
@@ -63,7 +63,7 @@ export default class AQSender {
         // 连接服务器
         oWebSocket.onopen = (): void => {
             console.log(`已连接服务器, URL = ${strURL}`);
-            this._oWebSocket = oWebSocket;
+            this.webSocket = oWebSocket;
             
             if (null != funCallback) {
                 funCallback();
@@ -73,27 +73,27 @@ export default class AQSender {
         // 异常
         oWebSocket.onerror = (): void => {
             console.error(`连接异常, URL = ${strURL}`);
-            this._oWebSocket = null;
+            this.webSocket = null;
         }
 
         // 断开服务器
         oWebSocket.onclose = (): void => {
             console.warn("服务器连接已关闭");
-            this._oWebSocket = null;
+            this.webSocket = null;
         }
 
         // 收到消息
-        oWebSocket.onmessage = (oEvent)=> {
-            if (null == oEvent ||
-                null == oEvent.data) {
+        oWebSocket.onmessage = (event)=> {
+            if (null == event ||
+                null == event.data) {
                 return;
             }
 
             //收到的消息是一个字节数组
-            let bytebuf = new ByteBuffer(oEvent.data);
+            let bytebuf = new ByteBuffer(event.data);
 
             //解包
-            let byteBuffer = bytebuf.short().short().unpack();
+            let byteBuffer = bytebuf.int32().short().unpack();
             //解析bodylen
             let bodyLen = byteBuffer[0];
             //解析command
@@ -107,9 +107,9 @@ export default class AQSender {
             let msgBody = unpack[2];
 
             // 构建消息体
-            let oMsgBody = this._oMsgDecoder.decode(msgCommand, msgBody);
+            let aqMsgBody = this.msgDecoder.decode(msgCommand, msgBody);
 
-            if (null == oMsgBody) {
+            if (null == aqMsgBody) {
                 console.error(`构建消息体为空, msgCommand = ${msgCommand}`);
                 return;
             }
@@ -117,7 +117,7 @@ export default class AQSender {
             console.log(`从服务端收到消息, msgCommand = ${msgCommand}`);
 
             // 处理消息
-            this.onMsgReceived(msgCommand, oMsgBody);
+            this.onMsgReceived(msgCommand, aqMsgBody);
         }
     }
 
@@ -127,7 +127,7 @@ export default class AQSender {
      */
     heartbeatLoop() {
         let loop = () =>{
-            if(this._oWebSocket == null){
+            if(this.webSocket == null){
                 console.error("[心跳失败]未连接")
                 return;
             }
@@ -151,19 +151,19 @@ export default class AQSender {
             return;
         }
 
-        if (null == this._oWebSocket) {
+        if (null == this.webSocket) {
             console.error("WebSocket 尚未初始化");
             return;
         }
 
-        let msgPack = this._oMsgEncoder.encode(msgCommand, msgBody);
+        let msgPack = this.msgEncoder.encode(msgCommand, msgBody);
         if (null == msgPack || msgPack.byteLength <= 0) {
             console.error(`字节数组为空, msgCommand = ${msgCommand}`);
             return;
         }
 
         console.log(`发送消息, msgCommand = ${msgCommand}`);
-        this._oWebSocket.send(msgPack);
+        this.webSocket.send(msgPack);
     }
 
     /**

@@ -14,13 +14,13 @@ export default class AQMsgDecoder {
      * 构建消息体
      * 
      * @param nMsgCode 消息编码
-     * @param oUint8Array 字节数组
+     * @param uint8Array 字节数组
      * @return 消息体
      */
-    decode(msgCommand: number, oUint8Array: Uint8Array): any {
+    decode(msgCommand: number, uint8Array: Uint8Array): any {
         if (msgCommand < 0 || 
-            null == oUint8Array || 
-            oUint8Array.byteLength <= 0) {
+            null == uint8Array || 
+            uint8Array.byteLength <= 0) {
             return null;
         }
 
@@ -30,10 +30,10 @@ export default class AQMsgDecoder {
             console.error(`消息名称为空, msgCommand = ${msgCommand}`);
             return null;
         }
-        let oTempArray = strMsgName.split("_");
+        let tempArray = strMsgName.split("_");
         strMsgName = "";
 
-        for (let strTemp of oTempArray) {
+        for (let strTemp of tempArray) {
             strMsgName += strTemp.charAt(0) + strTemp.substr(1).toLowerCase();
         }
 
@@ -46,7 +46,7 @@ export default class AQMsgDecoder {
             return null;
         }
 
-        return oMsgClazz.deserializeBinary(oUint8Array);
+        return oMsgClazz.deserializeBinary(uint8Array);
     }
 
     getMessageName(value) {

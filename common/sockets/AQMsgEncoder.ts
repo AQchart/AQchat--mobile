@@ -26,7 +26,7 @@ export default class AQMsgEncoder {
         var msgLen =msgBodySerialize.length;
 
         let pack = new ByteBuffer(null, 0);
-        pack.short(msgLen).short(msgCommand).byteArray(msgBodySerialize,msgBodySerialize.length)
+        pack.int32(msgLen).short(msgCommand).byteArray(msgBodySerialize,msgBodySerialize.length)
 
         return pack.pack(false);
     }
