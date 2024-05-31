@@ -7,7 +7,7 @@
 			<lottie :src="LottieChat"></lottie>
 		</view>
 		<view class="chat-text bounce_fall">
-			Anonymous Quick Chat
+			AQChat
 		</view>
 		<view class="chat-text-printer">{{ descText }}</view>
 		<view class="hot-point-list">
@@ -56,7 +56,7 @@
 	const advantageList = [
 		{
 			title: '🚀即时通讯',
-			desc: '采用Netty实现高效处理，protobuf协议轻便快捷'
+			desc: 'protobuf协议轻便快捷，采用Netty实现高效处理'
 		},
 		{
 			title: '🎯便捷',
@@ -64,7 +64,7 @@
 		},
 		{
 			title: '✨简单',
-			desc: '所见即所得，0引导'
+			desc: '0引导，所见即所得'
 		},
 	]
 </script>
@@ -104,8 +104,7 @@
 			padding: 24rpx;
 
 			.hot-point-item {
-				padding: 20px 10px;
-				border-bottom: 12px solid var(--ad-shadow);
+				padding: 10px 10px;
 				border-radius: 10px;
 				font-family: 'Times New Roman', Times, serif;
 
@@ -125,7 +124,7 @@
 			margin-top: 20px;
 			font-size: 24px;
 			font-family: "YYZY";
-			background-color: #466AFB;
+			background-color: var(--im-primary);;
 			color: #fff;
 			text-align: center;
 			cursor: pointer;
@@ -138,8 +137,6 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			background-image: linear-gradient(135deg, #92a4fe 0%, #466AFB 100%);
-			box-shadow: 0 20px 30px -6px rgba(70, 106, 251, 0.5);
 			text-align: center;
 			&:hover {
 				transform: translateY(3px);
