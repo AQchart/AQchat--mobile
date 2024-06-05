@@ -1,8 +1,5 @@
 {
-  "devDependencies": {
-    "node-sass": "^9.0.0",
-    "sass-loader": "^14.2.1"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@dcloudio/uni-app": "^2.0.2-4000820240401001",
     "@multiavatar/multiavatar": "^1.0.7",
