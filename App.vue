@@ -1,33 +1,20 @@
 <script setup lang="ts">
-	import { ref, onMounted, nextTick } from 'vue'
-
 	import { useAppStore } from './store/modules/app'
 	import useSockets from './common/sockets/useSocket'
+import { nextTick, onMounted } from "vue";
+	
 	const appStore = useAppStore()
-
-	const initSockets = useSockets()
-
-
+	const { initSocketFun } = useSockets()
 	const changeTheme = () => {
 		const html = document.getElementsByTagName('html')[0];
 		html.setAttribute('class', !appStore.themeDark ? 'light-theme' : 'dark-theme')
 	}
 
-	const initCall = () => {
-		if (!appStore.websocketStatus) {
-			uni.showToast({
-				title: '连接服务器失败！',
-				icon: 'error',
-				duration: 2000
-			})
-		}
-	}
-
 	changeTheme()
-	setTimeout(() => {
-		initSockets.initSocketFun()
-		initCall()
-	}, 1000)
+	
+	setTimeout(()=>{
+		initSocketFun();
+	},500)
 </script>
 
 <style lang="scss">
