@@ -150,7 +150,9 @@
 			margin-right: 20px;
 			margin-left: 20px;
 			flex-direction: column;
-
+			.name{
+				color: var(--txt-color);;
+			}
 			.message-box {
 				margin-top: 5px;
 				background-color: var(--im-txt-bg);
@@ -205,10 +207,12 @@
 
 	.left {
 		justify-content: flex-start;
+		text-align: left;
 	}
 
 	.right {
 		justify-content: flex-end;
+		text-align: right;
 	}
 
 	.center {

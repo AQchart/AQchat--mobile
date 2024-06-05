@@ -23,6 +23,7 @@
 	.text-message {
 		border-radius: 10px;
 		color: var(--text-message-color);
+		text-align: left;
 		
 		::v-deep * {
 			white-space: wrap;
