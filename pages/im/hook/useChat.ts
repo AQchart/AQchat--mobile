@@ -26,22 +26,6 @@ export default () => {
 		appStore.pushMessage(res)
 	}
 
-	// 发送消息
-	const sendMessageFun = (msg : any) => {
-		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//注册获取回调函数
-		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.SEND_MSG_ACK, (res : any) => { sendMessageAck(res) });
-		const message = new AQChatMSg.default.SendMsgCmd()
-		message.setRoomid(msg.roomId)
-		message.setMsgtype(msg.msgType)
-		message.setMsg(msg.msg)
-		message.setMsgid(msg.msgId)
-		AQSender.getInstance().sendMsg(
-			AQChatMSg.default.MsgCommand.SEND_MSG_CMD,
-			message
-		);
-	}
-
 	const RecoverUserAck = (res : any) => {
 		if (!res) {
 			uni.showToast({
@@ -79,17 +63,6 @@ export default () => {
 		);
 	}
 
-	// 接收消息回调
-	const reciveMessageFun = () => {
-		
-		
-	}
-	
-	// 同步消息回调
-	const asyncChatRrcordAck = (res: any[]) => {
-		appStore.asyncMessage(res)
-	}
-
 	// 同步消息
 	const asyncRoomMessageFun = (message : AQChatMSg.default.SyncChatRecordCmd) => {
 		AQSender.getInstance().sendMsg(
@@ -99,8 +72,6 @@ export default () => {
 	}
 
 	return {
-		sendMessageFun,
-		reciveMessageFun,
 		asyncRoomMessageFun,
 		RecoverUserFun
 	}
