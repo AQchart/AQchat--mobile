@@ -1,39 +1,39 @@
 /*
  * @Author: zsdddz
  * @Date: 2024-04-21 00:40:59
- * @LastEditTime: 2024-05-29 17:12:19
+ * @LastEditTime: 2024-05-30 10:05:21
  */
 
 
-import { w3cwebsocket } from 'websocket';
+import { w3cwebsocket} from 'websocket';
 import AQMsgDecoder from './AQMsgDecoder';
 import AQMsgEncoder from './AQMsgEncoder';
 import ByteBuffer from './codec/ByteBuffer'
 import * as AQChatMSg from './protocol/AQChatMsgProtocol_pb';
 
 const SERVER_HOST = import.meta.env.VITE_SOCKET_API;
-
+var loopTimer:any = null;
 
 export default class AQSender {
-     /**
-        * 单例对象
-        */
-        private static instance: AQSender = new AQSender();
-    
-        /**
-         * WebSocket
-         */
-        private webSocket: w3cwebsocket | null = null;
-    
-        /**
-         * 消息编码器
-         */
-        private readonly msgEncoder: AQMsgEncoder = new AQMsgEncoder();
-    
-        /**
-         * 消息解码器
-         */
-        private readonly msgDecoder: AQMsgDecoder = new AQMsgDecoder();
+    /**
+    * 单例对象
+    */
+    private static instance: AQSender = new AQSender();
+
+    /**
+     * WebSocket
+     */
+    private webSocket: w3cwebsocket | null = null;
+
+    /**
+     * 消息编码器
+     */
+    private readonly msgEncoder: AQMsgEncoder = new AQMsgEncoder();
+
+    /**
+     * 消息解码器
+     */
+    private readonly msgDecoder: AQMsgDecoder = new AQMsgDecoder();
 
     /**
      * 私有化类默认构造器
@@ -54,7 +54,7 @@ export default class AQSender {
      * @param funCallback 回调函数
      */
     connect(funCallback: () => void): void {
-        let strURL = `ws://${SERVER_HOST}`;
+        let strURL = `${SERVER_HOST}`;
         console.log(`准备连接服务器, URL = ${strURL}`);
 
         let oWebSocket = new w3cwebsocket(strURL);
@@ -80,6 +80,7 @@ export default class AQSender {
         oWebSocket.onclose = (): void => {
             console.warn("服务器连接已关闭");
             this.webSocket = null;
+            this.closeService()
         }
 
         // 收到消息
@@ -98,7 +99,7 @@ export default class AQSender {
             let bodyLen = byteBuffer[0];
             //解析command
             let msgCommand = byteBuffer[1];
-            if (msgCommand < 0) {
+            if (msgCommand < 0 || bodyLen <= 0) {
                 console.error("从服务端收到无效的消息");
                 return;
             }
@@ -114,7 +115,7 @@ export default class AQSender {
                 return;
             }
 
-            console.log(`从服务端收到消息, msgCommand = ${msgCommand}`);
+            // console.log(`从服务端收到消息, msgCommand = ${msgCommand}`);
 
             // 处理消息
             this.onMsgReceived(msgCommand, aqMsgBody);
@@ -136,7 +137,14 @@ export default class AQSender {
             pack.setPing("AQChat-PING");
             this.sendMsg(AQChatMSg.default.MsgCommand.HEART_BEAT_CMD,pack);
         }
-        setInterval(loop, 1000 * 10);
+        loopTimer = setInterval(loop, 3000);
+    }
+
+    /**
+     * 心跳停止
+     */
+    heartbeatStop(){
+        if(loopTimer) clearInterval(loopTimer);
     }
 
     /**
@@ -153,6 +161,7 @@ export default class AQSender {
 
         if (null == this.webSocket) {
             console.error("WebSocket 尚未初始化");
+            this.closeService();
             return;
         }
 
@@ -162,7 +171,7 @@ export default class AQSender {
             return;
         }
 
-        console.log(`发送消息, msgCommand = ${msgCommand}`);
+        // console.log(`发送消息, msgCommand = ${msgCommand}`);
         this.webSocket.send(msgPack);
     }
 
@@ -177,5 +186,11 @@ export default class AQSender {
             null == msgBody) {
             return;
         }
+    }
+
+    closeService(){}
+
+    close(){
+        this.webSocket && this.webSocket.close();
     }
 }
