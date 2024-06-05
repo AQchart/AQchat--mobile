@@ -27,16 +27,9 @@ AQChat 一个极速、便捷的匿名在线即时聊天室。
 <img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/20240511212754.jpg" height="500">
 <img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/20240511212801.jpg" height="500">
 
+# 部署文档
 
+![戴戴的Linux](https://gitee.com/StephenJose_Dai/dockerhaschat/raw/master/daidailinux.jpg)
 
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
+- 微信扫一扫二维码关注公众号
+- 发送aqchat可获取AQChat部署教程
