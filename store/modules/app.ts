@@ -35,7 +35,7 @@ interface AppState {
 }
 
 const epoch = +new Date();
-const customSnowflake = new CustomSnowflake(1,epoch);
+const customSnowflake = new CustomSnowflake(1, epoch);
 
 export const useAppStore = defineStore('app', {
 	unistorage: {
@@ -77,8 +77,13 @@ export const useAppStore = defineStore('app', {
 		setUserInfo(userInfo : User) {
 			this.userInfo = userInfo
 		},
-		setMsgRecord(msg : Msg) {
-			this.msgList.unshift(msg)
+		resetRoomInfo() {
+			this.roomInfo = {
+				roomId: '',
+				roomNo: '',
+				roomName: ''
+			}
+			this.msgList = []
 		},
 		clearMsgStatusTimer(id : string) {
 			if (this.msgStatusTimer[id]) {
@@ -93,13 +98,15 @@ export const useAppStore = defineStore('app', {
 			this.socket.status = status
 		},
 		setRoomInfo(info : RoomInfo) {
-			if (this.roomInfo.roomId != info.roomId) {
-				this.clearMessage()
-			}
 			this.roomInfo = info
 		},
 		clearMessage() {
 			this.msgList = []
+		},
+		setMsgRecord(msg : Msg) {
+			if(!this.msgList.find(x=>x.msgId == msg.msgId)?.msgId){
+				this.msgList.unshift(msg)
+			}
 		},
 		pushMessage(msg : any) {
 			this.msgList.push(msg)
@@ -136,7 +143,7 @@ export const useAppStore = defineStore('app', {
 				msgStatus: MsgStatusEnum.PENDING
 			}
 			this.sendInfoLocalFun(msgInfo)
-			
+
 			this.sendInfoNetWorkFun(msgInfo)
 		},
 		sendInfoLocalFun(msg : Msg) {
