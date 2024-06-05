@@ -1,29 +1,51 @@
 import { defineStore } from 'pinia'
-
-interface UserInfo {
-	userId : String,
-	userName : String,
-	userAvatar : String
-}
+import User from '@/class/User'
+import Msg from '@/class/Msg'
+import AQSender from '@/common/sockets/AQSender'
+import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb'
+import MsgStatusEnum from "@/enums/MsgStatusEnum"
+import MsgTypeEnum from "@/enums/MsgTypeEnum"
+import CustomSnowflake from "@/utils/CustomSnowflake"
 
 interface RoomInfo {
 	roomId : string,
-	roomNo : number,
+	roomNo : string,
 	roomName : string,
 }
 
 
 interface AppState {
 	websocketStatus : boolean,
-	userInfo : UserInfo,
+	socket : any,
+	userInfo : User,
 	themeDark : boolean,
 	roomInfo : RoomInfo,
-	msgQueue : any[]
+	// 消息列表
+	msgList : Msg[],
+	// 消息状态定时器
+	msgStatusTimer : Object,
+	// 房间成员
+	memberList : User[],
+	// 声音开启状态
+	soundActive : boolean,
+	// 声音dom
+	soundDom : any,
+	// 消息id，更新用于监听变化，判断是否需要消息触底
+	msgId : number | string
 }
+
+const epoch = +new Date();
+const customSnowflake = new CustomSnowflake(1,epoch);
+
 export const useAppStore = defineStore('app', {
-	unistorage: true, // 是否持久化
+	unistorage: {
+		paths: ['theme', 'userInfo', 'roomInfo']
+	}, // 是否持久化
 	state: () : AppState => ({
 		websocketStatus: false,
+		socket: {
+			status: false
+		},
 		userInfo: {
 			userId: '',
 			userName: '',
@@ -32,23 +54,43 @@ export const useAppStore = defineStore('app', {
 		themeDark: false,
 		roomInfo: {
 			roomId: '',
-			roomNo: 0,
+			roomNo: '',
 			roomName: '',
 		},
-		msgQueue: []
+		msgList: [],
+		msgStatusTimer: {},
+		memberList: [],
+		soundActive: false,
+		soundDom: null,
+		msgId: ''
 	}),
 	getters: {
 		theme: (state) => state.themeDark,
 	},
 	actions: {
+		setMsgId(msgId : number | string) {
+			this.msgId = msgId;
+		},
 		setTheme(theme : boolean) {
 			this.themeDark = theme
 		},
-		setUserInfo(userInfo : UserInfo) {
+		setUserInfo(userInfo : User) {
 			this.userInfo = userInfo
+		},
+		setMsgRecord(msg : Msg) {
+			this.msgList.unshift(msg)
+		},
+		clearMsgStatusTimer(id : string) {
+			if (this.msgStatusTimer[id]) {
+				clearTimeout(this.msgStatusTimer[id]);
+				delete this.msgStatusTimer[id]
+			}
 		},
 		setWebsocketStatus(status : boolean) {
 			this.websocketStatus = status
+		},
+		setSocketStatus(status : any) {
+			this.socket.status = status
 		},
 		setRoomInfo(info : RoomInfo) {
 			if (this.roomInfo.roomId != info.roomId) {
@@ -57,14 +99,85 @@ export const useAppStore = defineStore('app', {
 			this.roomInfo = info
 		},
 		clearMessage() {
-			this.msgQueue = []
+			this.msgList = []
 		},
 		pushMessage(msg : any) {
-			this.msgQueue.push(msg)
+			this.msgList.push(msg)
 		},
 		// 同步房间消息
 		asyncMessage(msgList : any[]) {
-			this.msgQueue = msgList
-		}
+			this.msgList = msgList
+		},
+		resetAllInfo() {
+			this.roomInfo = {
+				roomId: '',
+				roomNo: '',
+				roomName: ''
+			}
+			this.userInfo = {
+				userId: '',
+				userName: '',
+				userAvatar: ''
+			}
+			this.msgList = []
+		},
+		sendInfo(msg : string, msgType : MsgTypeEnum) {
+			const msgId = customSnowflake.nextId();
+			const msgInfo : Msg = {
+				user: {
+					userId: this.userInfo.userId,
+					userAvatar: this.userInfo.userAvatar,
+					userName: this.userInfo.userName,
+				},
+				roomId: this.roomInfo.roomId,
+				msgId: msgId,
+				msgType: msgType,
+				msg: msg,
+				msgStatus: MsgStatusEnum.PENDING
+			}
+			this.sendInfoLocalFun(msgInfo)
+			
+			this.sendInfoNetWorkFun(msgInfo)
+		},
+		sendInfoLocalFun(msg : Msg) {
+			this.msgList.push(msg)
+			this.setMsgId(msg.msgId as never)
+		},
+		sendInfoNetWorkFun(msg : Msg) {
+			let sendMsg = new AQChatMSg.default.SendMsgCmd();
+			sendMsg.setMsgid(msg.msgId);
+			sendMsg.setMsgtype(msg.msgType);
+			sendMsg.setMsg(msg.msg)
+			sendMsg.setRoomid(this.roomInfo.roomId);
+			sendMsg.setExt(msg.ext);
+			AQSender.getInstance().sendMsg(
+				AQChatMSg.default.MsgCommand.SEND_MSG_CMD, sendMsg
+			)
+			// 10s消息未发送成功，则设置消息为发送失败状态
+			this.msgStatusTimer[msg.msgId] = setTimeout(() => {
+				msg.msgStatus = MsgStatusEnum.REJECTED
+				for (let i = this.msgList.length - 1; i >= 0; i--) {
+					if (this.msgList[i].msgId === msg.msgId) {
+						const newMsg = { ...msg };
+						newMsg.msgStatus = MsgStatusEnum.REJECTED;
+						this.msgList.splice(i, 1, newMsg)
+						break;
+					}
+				}
+			}, 10000)
+		},
+		// 删除聊天室成员
+		deleteNumberList(user : User) {
+			this.memberList = this.memberList.filter((x : User) => x.userId != user.userId);
+		},
+		// 撤回聊天消息
+		removeMsg(msgId : number | string, msg : any) {
+			for (let i = this.msgList.length - 1; i >= 0; i--) {
+				if (this.msgList[i].msgId == msgId) {
+					this.msgList.splice(i, 1, msg)
+					break;
+				}
+			}
+		},
 	}
 })
