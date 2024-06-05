@@ -1,6 +1,6 @@
 <template>
 	<view class="editor">
-		<div class="im-editor im-blank" @input="inputText" ref="inputRef" contenteditable :placeholder="placeholder">
+		<div class="im-editor im-blank" @input="inputText" @focus="inputFocus" ref="inputRef" contenteditable :placeholder="placeholder">
 		</div>
 	</view>
 </template>
@@ -29,9 +29,13 @@
 	const inputChange = (html : any) => {
 		emits('input', html)
 	}
+	
+	const inputFocus = () => {
+		emits('focus')
+	}
 
 	const insertImage = (obj : any) => {
-		let img = `<img src="${obj.src}" alt="${obj.alt}" width="${obj.width}" height="${obj.height}">`
+		let img = `<img src="${obj.src}" alt="${obj.alt}" class='emo-image' />`
 		let html = getInnerHtml() + img
 		setInnerHtml(html)
 		inputChange(getInnerHtml())
@@ -59,6 +63,13 @@
 		width: 100%;
 		height: 60px;
 		min-height: 60px;
+	}
+	
+	::v-deep .emo-image{
+		height: 40rpx;
+		width: 40rpx;
+		vertical-align: middle;
+		display: inline-block;
 	}
 
 	.im-editor {

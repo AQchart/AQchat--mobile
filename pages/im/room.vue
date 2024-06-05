@@ -1,11 +1,11 @@
 <template>
 	<view class="chat">
-		<scroll-view :style="{height: `${windowHeight}rpx`}" id="scrollview" scroll-y="true" :scroll-top="scrollTop"
+		<scroll-view :style="{height: `${windowHeight}px`}" id="scrollview" scroll-y="true" :scroll-top="scrollTop"
 			:scroll-with-animation="true" class="scroll-view">
 			<!-- 聊天主体 -->
 			<view id="msglistview" class="chat-body">
 				<!-- 聊天记录 -->
-				<render-msg class="item" v-for="(msg, index) in msgList" :key="index" :message="msg"
+				<render-msg v-for="msg in msgList" :key="msg.msgId" :message="msg"
 					:currentUser="appStore.userInfo"></render-msg>
 			</view>
 		</scroll-view>
@@ -14,7 +14,8 @@
 		<view class="chat-bottom">
 			<view class="send-msg" :class="(otherShow || emojiShow) ? 'send-msg-other': 'send-msg-only'">
 				<view class="uni-textarea">
-					<imEditor ref="editorRef" class="im-container" placeholder="输入内容..." @input="onEditorInput">
+					<imEditor ref="editorRef" class="im-container" placeholder="输入内容..." @input="onEditorInput"
+						@focus="textareaFocus">
 					</imEditor>
 				</view>
 				<view class="send-btn">
@@ -60,10 +61,16 @@
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
 	import { OssHelper } from '../../common/sockets/utils/OssHelper'
-	import Snowflake from './hook/CustomSnowflake'
-	import AQChatMsgProtocol_pb, * as AQChatMSg from '../../common/sockets/protocol/AQChatMsgProtocol_pb';
-	const appStore = useAppStore()
+	import CustomSnowflake from "@/utils/CustomSnowflake"
+	import * as AQChatMSg from '../../common/sockets/protocol/AQChatMsgProtocol_pb';
+	import AQSender from '@/common/sockets/AQSender'
+	import MsgTypeEnum from "@/enums/MsgTypeEnum"
+	import MsgStatusEnum from "@/enums/MsgStatusEnum"
+	import Msg from "@/class/Msg"
 
+	const appStore = useAppStore()
+	const epoch = +new Date();
+	const customSnowflake = new CustomSnowflake(1, epoch);
 	const {
 		sendMessageFun,
 		reciveMessageFun,
@@ -72,17 +79,15 @@
 	} = useChart()
 
 
-	const snowFake = new Snowflake(2)
-
-	const scrollTop = ref(0)
-
+	const scrollTop = ref(999999)
+	// 新消息条数
+	const newMsgCount = ref(0);
 	const otherShow = ref(false)
-
 	const emojiShow = ref(false)
-
 	const editorRef = ref(null)
-
 	const msgStr = ref('')
+
+	let msgList : any = ref([])
 
 	const showOther = () => {
 		otherShow.value = !otherShow.value
@@ -91,13 +96,17 @@
 		}
 	}
 
+	const textareaFocus = () => {
+		console.log("聚焦");
+		otherShow.value = false;
+		emojiShow.value = false;
+	}
+
 
 	const selectIcon = (icon : any) => {
 		let imgObject = {
 			src: icon.icon,
 			alt: icon.title,
-			width: '30rpx',
-			height: '30rpx'
 		}
 		if (editorRef.value != null) {
 			editorRef.value.insertImage(imgObject)
@@ -113,6 +122,18 @@
 		msgStr.value = html
 	}
 
+	// 发送消息同步指令
+	const syncChatRecordFun = () => {
+		let syncChatRecord = new AQChatMSg.default.SyncChatRecordCmd();
+		syncChatRecord.setRoomid(appStore.roomInfo.roomId);
+		AQSender.getInstance().sendMsg(
+			AQChatMSg.default.MsgCommand.SYNC_CHAT_RECORD_CMD, syncChatRecord
+		)
+
+
+
+	}
+
 	// 上传图片
 	const uploadImage = () => {
 		uni.chooseImage({
@@ -120,13 +141,37 @@
 			sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
 			sourceType: ['album'], //从相册选择
 			success: async function (res : any) {
-				const result = await OssHelper.getInstance().uploadFile(res.tempFiles[0], AQChatMSg.default.MsgType.IMAGE)
-				console.log(result)
-				if (result && result.res.status == 200) {
-					sendMessage(AQChatMSg.default.MsgType.IMAGE, result.url)
-					scrollToBottom()
+				const msgId = customSnowflake.nextId();
+				let msgInfo : Msg = {
+					user: {
+						userId: appStore.userInfo.userId,
+						userAvatar: appStore.userInfo.userAvatar,
+						userName: appStore.userInfo.userName,
+					},
+					roomId: appStore.roomInfo.roomId,
+					msgId: msgId,
+					msgType: MsgTypeEnum.IMAGE,
+					msg: res.tempFilePaths[0],
+					msgStatus: MsgStatusEnum.PENDING,
+					ext: res.tempFiles[0].name
 				}
+				appStore.sendInfoLocalFun(msgInfo)
+				uploadToOss(msgInfo, res.tempFiles[0])
 			}
+		});
+	}
+
+	// 上传文件到服务器
+	const uploadToOss = (msgInfo : Msg, file : File) => {
+		OssHelper.getInstance().init(msgInfo.msgType, () => {
+			OssHelper.getInstance().uploadFile(file)
+				.then((res) => {
+					msgInfo.msg = res.url;
+					// 上传到Oss成功后再将文件发送到真实网络中
+					appStore.sendInfoNetWorkFun(msgInfo)
+				}).catch((err) => {
+					ElMessage.error("上传失败,错误为:" + err)
+				});
 		});
 	}
 
@@ -135,10 +180,23 @@
 		uni.chooseVideo({
 			sourceType: ['camera', 'album'],
 			success: async function (res : any) {
-				const result = await OssHelper.getInstance().uploadFile(res.tempFile, AQChatMSg.default.MsgType.VIDEO)
-				if (result && result.res.status == 200) {
-					sendMessage(AQChatMSg.default.MsgType.VIDEO, result.url)
+				console.log(res);
+				const msgId = customSnowflake.nextId();
+				let msgInfo : Msg = {
+					user: {
+						userId: appStore.userInfo.userId,
+						userAvatar: appStore.userInfo.userAvatar,
+						userName: appStore.userInfo.userName,
+					},
+					roomId: appStore.roomInfo.roomId,
+					msgId: msgId,
+					msgType: MsgTypeEnum.VIDEO,
+					msg: res.tempFilePath,
+					msgStatus: MsgStatusEnum.PENDING,
+					ext: res.name
 				}
+				appStore.sendInfoLocalFun(msgInfo)
+				uploadToOss(msgInfo, res.tempFile)
 			}
 		});
 	}
@@ -149,13 +207,30 @@
 		}
 	}
 
-	const msgList = computed(() => {
-		return appStore.msgQueue
-	})
 
-	watch(appStore.msgQueue, () => {
+
+	watch(appStore.msgList, (newV) => {
+		msgList.value = newV;
+	}, { deep: true })
+
+	// 监听msgId变化，判断是否需要触底
+	watch(() => appStore.msgId, (newV) => {
+		console.log("消息更新");
 		scrollToBottom()
 	})
+
+	// 监听websocket状态
+	watch(appStore.socket, (newV) => {
+		if (newV.status) {
+			setTimeout(() => {
+				syncChatRecordFun();
+			}, 500)
+		} else {
+			RecoverUser()
+		}
+	})
+
+
 
 	const showSend = computed(() => {
 		return msgStr.value.length > 0
@@ -168,12 +243,12 @@
 	const windowHeight = computed(() => {
 		let px = uni.getSystemInfoSync().windowHeight;
 		if (emojiShow.value || otherShow.value) {
-			px = rpxTopx(px) - 90
+			px = px - 162
 		}
 		else {
-			px = rpxTopx(px) - 75
+			px = px - 62
 		}
-		return px * 3.3
+		return px
 	})
 
 	// 滚动至聊天底部
@@ -183,17 +258,15 @@
 			query.select('#scrollview').boundingClientRect();
 			query.select('#msglistview').boundingClientRect();
 			query.exec((res) => {
-				if (res[1].height > res[0].height) {
-					scrollTop.value = (emojiShow.value || otherShow.value) ? rpxTopx(res[1].height) + 260 : rpxTopx(res[1].height) + 260 * 3
-				} else {
-					scrollTop.value = (emojiShow.value || otherShow.value) ? rpxTopx(res[0].height) + 260 : rpxTopx(res[0].height) + 260 * 3
-				}
+				const height1 = res[1].height
+				const height0 = res[0].height
+				scrollTop.value = height1 > height0 ? height1 : height0;
 			})
 		}, 50)
 	}
-	
+
 	// 恢复用户信息
-	const RecoverUser = () => {
+	function RecoverUser() {
 		uni.showModal({
 			title: '提示',
 			content: '长时间未活动，服务器已断开连接，是否恢复连接',
@@ -232,23 +305,19 @@
 
 	// 组装和发送消息
 	const sendMessage = (type : number, msg : string) => {
-		const data = {
-			roomId: appStore.roomInfo.roomId,
-			msgType: type,
-			msg: msg,
-			msgId: snowFake.nextId()
-		}
-		sendMessageFun(data)
+		// const data = {
+		// 	roomId: appStore.roomInfo.roomId,
+		// 	msgType: type,
+		// 	msg: msg,
+		// 	msgId: snowFake.nextId()
+		// }
+		// sendMessageFun(data)
+		appStore.sendInfo(msg, MsgTypeEnum.TEXT)
 		msgStr.value = ''
 		editorRef.value.clear()
 	}
-	
-	
-	watch(appStore.websocketStatus, (value: boolean) => {
-		if(!value) {
-			RecoverUser()
-		}
-	})
+
+
 
 	onMounted(() => {
 		// 注册消息回调
@@ -258,14 +327,14 @@
 		uni.setNavigationBarTitle({
 			title: appStore.roomInfo.roomName
 		})
-		console.log(msgList.value)
-		setTimeout(() => {
-			scrollToBottom()
-			OssHelper.getInstance().init(AQChatMSg.default.MsgType.IMAGE, () => { })
-		}, 500)
-		setTimeout(() => {
-			OssHelper.getInstance().init(AQChatMSg.default.MsgType.VIDEO, () => { })
-		}, 500)
+		// msgList.value = appStore.msgList
+		// setTimeout(() => {
+		// 	scrollToBottom()
+		// 	OssHelper.getInstance().init(AQChatMSg.default.MsgType.IMAGE, () => { })
+		// }, 500)
+		// setTimeout(() => {
+		// 	OssHelper.getInstance().init(AQChatMSg.default.MsgType.VIDEO, () => { })
+		// }, 500)
 	})
 </script>
 
@@ -292,22 +361,12 @@
 				color: transparent;
 			}
 
-			background-color: #F6F6F6;
+			background-color: var(--im-content-bg2);
 
 			.chat-body {
 				display: flex;
 				flex-direction: column;
 				padding-top: 23rpx;
-
-				.item {
-					display: flex;
-					padding: 23rpx 30rpx;
-					margin-top: 10px;
-
-					&:first-child {
-						margin-top: 5px;
-					}
-				}
 			}
 		}
 
@@ -353,7 +412,7 @@
 			.send-btn {
 				display: flex;
 				flex: 0 0 auto;
-				margin-left: 25rpx;
+				margin-left: 10rpx;
 				height: 75rpx;
 
 				.send {
@@ -394,13 +453,10 @@
 					justify-content: center;
 					width: 65rpx;
 					height: 65rpx;
-					margin-left: 5px;
-					background: var(--emoji-bg);
 					border-radius: 50rpx;
-					font-size: 28rpx;
+					font-size: 36rpx;
 					font-family: PingFang SC;
 					font-weight: 500;
-					color: var(--emoji-icon-color);
 					line-height: 28rpx;
 				}
 			}

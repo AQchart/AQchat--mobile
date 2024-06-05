@@ -54,17 +54,6 @@ export default () => {
 			})
 		}
 
-		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//重写onMsgReceived方法
-		AQSender.getInstance().onMsgReceived = (msgCommand, msgBody) => {
-			let data = handlerFactory.handle(msgCommand, msgBody);
-			//获取回调函数
-			let callbackMethod = CallbackMethodManager.getCallback(msgCommand);
-			//执行回调函数
-			if (callbackMethod) {
-				callbackMethod(data);
-			}
-		}
 		//注册获取sts回调函数
 		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.JOIN_ROOM_ACK, (res: any) => { joinRoomAck(res) });
 		const message = new AQChatMSg.default.JoinRoomCmd()
@@ -83,20 +72,6 @@ export default () => {
 				icon: 'error'
 			})
 		}
-
-		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//重写onMsgReceived方法
-		AQSender.getInstance().onMsgReceived = (msgCommand, msgBody) => {
-			let data = handlerFactory.handle(msgCommand, msgBody);
-			//获取回调函数
-			let callbackMethod = CallbackMethodManager.getCallback(msgCommand);
-			//执行回调函数
-			if (callbackMethod) {
-				callbackMethod(data);
-			}
-		}
-		//注册获取sts回调函数
-		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.CREATE_ROOM_ACK, (res) => { createRoomAck(res) });
 
 		AQSender.getInstance().sendMsg(
 			AQChatMSg.default.MsgCommand.CREATE_ROOM_CMD,

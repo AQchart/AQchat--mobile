@@ -29,16 +29,6 @@ export default () => {
 	// 发送消息
 	const sendMessageFun = (msg : any) => {
 		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//重写onMsgReceived方法
-		AQSender.getInstance().onMsgReceived = (msgCommand, msgBody) => {
-			let data = handlerFactory.handle(msgCommand, msgBody);
-			//获取回调函数
-			let callbackMethod = CallbackMethodManager.getCallback(msgCommand);
-			//执行回调函数
-			if (callbackMethod) {
-				callbackMethod(data);
-			}
-		}
 		//注册获取回调函数
 		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.SEND_MSG_ACK, (res : any) => { sendMessageAck(res) });
 		const message = new AQChatMSg.default.SendMsgCmd()
@@ -80,19 +70,8 @@ export default () => {
 			})
 		}
 
-		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//重写onMsgReceived方法
-		AQSender.getInstance().onMsgReceived = (msgCommand, msgBody) => {
-			let data = handlerFactory.handle(msgCommand, msgBody);
-			//获取回调函数
-			let callbackMethod = CallbackMethodManager.getCallback(msgCommand);
-			//执行回调函数
-			if (callbackMethod) {
-				callbackMethod(data);
-			}
-		}
 		//注册获取回调函数
-		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.RECOVER_USER_ACK, (res : any) => { RecoverUserAck(res) });
+		// CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.RECOVER_USER_ACK, (res : any) => { RecoverUserAck(res) });
 
 		AQSender.getInstance().sendMsg(
 			AQChatMSg.default.MsgCommand.RECOVER_USER_CMD,
@@ -102,19 +81,8 @@ export default () => {
 
 	// 接收消息回调
 	const reciveMessageFun = () => {
-		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//重写onMsgReceived方法
-		AQSender.getInstance().onMsgReceived = (msgCommand, msgBody) => {
-			let data = handlerFactory.handle(msgCommand, msgBody);
-			//获取回调函数
-			let callbackMethod = CallbackMethodManager.getCallback(msgCommand);
-			//执行回调函数
-			if (callbackMethod) {
-				callbackMethod(data);
-			}
-		}
-		//注册获取回调函数
-		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.BROADCAST_MSG_ACK, (res : any) => { reciveMessageAck(res) });
+		
+		
 	}
 	
 	// 同步消息回调
@@ -124,19 +92,6 @@ export default () => {
 
 	// 同步消息
 	const asyncRoomMessageFun = (message : AQChatMSg.default.SyncChatRecordCmd) => {
-		let handlerFactory = AQMsgHandlerFactory.getInstance();
-		//重写onMsgReceived方法
-		AQSender.getInstance().onMsgReceived = (msgCommand, msgBody) => {
-			let data = handlerFactory.handle(msgCommand, msgBody);
-			//获取回调函数
-			let callbackMethod = CallbackMethodManager.getCallback(msgCommand);
-			//执行回调函数
-			if (callbackMethod) {
-				callbackMethod(data);
-			}
-		}
-		//注册获取回调函数
-		CallbackMethodManager.registerCallback(AQChatMSg.default.MsgCommand.SYNC_CHAT_RECORD_ACK, (res : any) => { asyncChatRrcordAck(res) });
 		AQSender.getInstance().sendMsg(
 			AQChatMSg.default.MsgCommand.SYNC_CHAT_RECORD_CMD,
 			message

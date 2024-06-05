@@ -4,25 +4,39 @@
 */
 
 <template>
-	<view class="message-item"
-		:class="currentUser.userId == message.user.userId ? 'right flex-right': 'left flex-left'">
-		<view class="avatar" v-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
-		<view class="message">
-			<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">{{ message.user.userName }}</view>
-			<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
-				<component :is="getMessageType()" v-bind="getProps"></component>
-			</view>
+	<view
+		:class="['msg-item',message.msgType == MsgTypeEnum.TIP? 'center' : currentUser.userId == message.user.userId ? 'right':'left']">
+		<view v-if="message.msgType == MsgTypeEnum.TIP" class="msg-tip msg-box">
+			{{ message.msg }}
+			<text v-if="message.msg.indexOf('撤回')!=-1 && message.ext" class='rewrite-box' @click='rewriteFun(item.ext)'>
+				重新编辑
+			</text>
 		</view>
-		<view class="avatar" v-if="currentUser.userId == message.user.userId" v-html="message.user.userAvatar"></view>
+		<view v-else class="message-item">
+			<view class="avatar" v-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
+			<view class="message">
+				<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">
+					{{ message.user.userName }}</view>
+				<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
+					<component :is="getMessageType()" v-bind="getProps"></component>
+				</view>
+			</view>
+			<view class="avatar" v-if="currentUser.userId == message.user.userId" v-html="message.user.userAvatar"></view>
+			<loading v-if="message.msgStatus === MsgStatusEnum.PENDING" class="mine-load" />
+		</view>
+		
 	</view>
 </template>
 
 <script lang="ts" setup>
+	import loading from "./loading.vue"
 	import { defineProps, onMounted, computed } from 'vue'
 	import text from './text.vue'
 	import image from './image.vue'
 	import voice from './voice.vue'
 	import video from './video.vue'
+	import MsgTypeEnum from "@/enums/MsgTypeEnum"
+	import MsgStatusEnum from "@/enums/MsgStatusEnum"
 	enum messageType {
 		text = 0,
 		image = 1,
@@ -34,11 +48,11 @@
 	const props = defineProps({
 		message: {
 			type: Object,
-			default: {}
+			default: () => { }
 		},
 		currentUser: {
 			type: Object,
-			default: {}
+			default: () => { }
 		}
 	})
 
@@ -57,6 +71,11 @@
 			case messageType.video:
 				return video
 		}
+	}
+
+	// 重新编辑
+	const rewriteFun = (ext : any) => {
+		// imCharRef.value && imCharRef.value.rewriteFun(ext)
 	}
 
 	// 获取消息组件props
@@ -80,12 +99,28 @@
 </script>
 
 <style lang="scss" scoped>
-	.flex-left {
-		justify-content: flex-start;
+	.msg-item {
+		display: flex;
+		padding: 23rpx 30rpx;
+		margin-top: 10px;
+		width: 100%;
+
+		&:first-child {
+			margin-top: 5px;
+		}
 	}
 
-	.flex-right {
-		justify-content: flex-end;
+	::v-deep .emo-image {
+		height: 40rpx;
+		width: 40rpx;
+		vertical-align: middle;
+		display: inline-block;
+	}
+	.msg-tip {
+		text-align: center;
+		font-size: 24rpx;
+		color: #ccc;
+		margin: 0 auto;
 	}
 
 	.message-item {
@@ -93,6 +128,13 @@
 		position: relative;
 		display: flex;
 		flex-direction: row;
+		
+		.mine-load {
+			position: absolute;
+			left: -20rpx;
+			top: calc(50% + 26rpx);
+			transform: translateY(-50%);
+		}
 
 		.avatar {
 			display: flex;
@@ -111,7 +153,7 @@
 
 			.message-box {
 				margin-top: 5px;
-				background-color: var(--text-message-bg);
+				background-color: var(--im-txt-bg);
 				border-radius: 5px;
 				padding: 10px;
 				color: var(--text-message-color);
@@ -126,6 +168,8 @@
 					max-width: 486rpx;
 					word-wrap: break-word;
 				}
+
+
 
 			}
 
@@ -160,10 +204,14 @@
 	}
 
 	.left {
-		left: 10rpx;
+		justify-content: flex-start;
 	}
 
 	.right {
-		right: 10rpx;
+		justify-content: flex-end;
+	}
+
+	.center {
+		justify-content: center;
 	}
 </style>

@@ -1,11 +1,11 @@
 <template>
 	<view>
-		<video :src="src" @click="showProp" width="100%" height="100%" controls="">
-			你的浏览器不支持video标签
+		<video class="video-box" :src="src" @click="showProp" width="100%" height="100%" controls="">
+			
 		</video>
 		<u-popup v-model="show" mode="center" custom-style="view-image-full" :closeable="true">
 			<video :src="src" autoplay="autoplay" controls>
-				你的浏览器不支持video标签
+				
 			</video>
 		</u-popup>
 	</view>
@@ -36,5 +36,9 @@
 			width: 100%;
 			height: 100%;
 		}
+	}
+	.video-box{
+		width: 245px;
+		height: 225px;
 	}
 </style>
