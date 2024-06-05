@@ -20,10 +20,41 @@
 	import roomDialog from './roomDialog.vue'
 	import lottie from "../../components/lottie.vue";
 	import lottieContent from '/static/assets/json/lottie-content.json';
+	import { useAppStore } from '@/store/modules/app'
+	import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb';
+	import AQSender from '@/common/sockets/AQSender'
 	
 	const roomDialogRef = ref(null)
+	const appStore = useAppStore()
 	const joinRoom = () => {
-		roomDialogRef.value.show(false)
+		if(appStore.roomInfo.roomId){
+			uni.showModal({
+				title: '系统提示',
+				content: `当前已加入聊天房【${appStore.roomInfo.roomName}】,是否恢复`,
+				confirmText: '恢复房间',
+				cancelText: '退出不管',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url:"/pages/im/room"
+						})
+					} else if (res.cancel) {
+						let model = new AQChatMSg.default.LeaveRoomCmd();
+						model.setRoomid(appStore.roomInfo.roomId);
+						AQSender.getInstance().sendMsg(
+							AQChatMSg.default.MsgCommand.LEAVE_ROOM_CMD, model
+						)
+						setTimeout(() => {
+							appStore.resetRoomInfo();
+							roomDialogRef.value.show(false)
+						}, 100)
+						
+					}
+				}
+			});
+		}else{
+			roomDialogRef.value.show(false)
+		}
 	}
 	const createRoom = () => {
 		roomDialogRef.value.show(true)
