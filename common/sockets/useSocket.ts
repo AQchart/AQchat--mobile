@@ -60,14 +60,14 @@ export default () => {
 					// 创建房间回调
 					case AQChatMSg.default.MsgCommand.CREATE_ROOM_ACK:
 						uni.navigateTo({
-							url:"/pages/im/room"
+							url: "/pages/im/room"
 						})
 						appStore.setRoomInfo(result);
 						break;
 					// 加入房间回调
 					case AQChatMSg.default.MsgCommand.JOIN_ROOM_ACK:
 						uni.navigateTo({
-							url:"/pages/im/room"
+							url: "/pages/im/room"
 						})
 						appStore.setRoomInfo(result);
 						break;
@@ -216,17 +216,31 @@ export default () => {
 				success: (res) => {
 					if (res.confirm) {
 						showTip.value = false;
+						// #ifdef H5
 						window.location.reload()
-						// const path = getPageFun();
-						// uni.redirectTo({
-						// 	url: '/' + path
-						// });
+						// #endif
+						// #ifndef H5
+						reloadPage();
+						// #endif
 					} else if (res.cancel) {
 						console.log('用户点击取消');
 					}
 				}
 			});
 		}
+	}
+	// 刷新页面
+	const reloadPage = () => {
+		uni.navigateBack({
+			delta: 1,
+			success: () => {
+				setTimeout(() => {
+					uni.navigateBack({
+						delta: 1
+					});
+				}, 100);
+			}
+		});
 	}
 	// 离开房间
 	const leaveRoomNotufyFun = (result : any) => {
@@ -264,7 +278,6 @@ export default () => {
 	// 消息同步
 	const syncChatRecordFun = (result : any) => {
 		console.log("消息同步", result);
-		// appStore.clearMessage();
 		for (let i = 0; i < result.length; i++) {
 			const msg : Msg = result[i]
 			appStore.setMsgRecord(msg)
@@ -309,7 +322,7 @@ export default () => {
 			const msgContent = result.user.userId === appStore.userInfo.userId ? '您' : result.user.userName;
 			const msg : Msg = {
 				roomId: result.roomId,
-				msgId:+new Date(),
+				msgId: +new Date(),
 				msgType: MsgTypeEnum.TIP,
 				msg: `${msgContent} 加入了房间`
 			}
