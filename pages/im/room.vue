@@ -57,12 +57,12 @@
 	import renderMsg from './components/render-msg.vue'
 	import imEditor from './layout/editor.vue'
 	import { ref, onMounted, computed, watch } from 'vue'
-	import { useAppStore } from '../../store/modules/app'
+	import { useAppStore } from '@/store/modules/app'
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
-	import { OssHelper } from '../../common/sockets/utils/OssHelper'
+	import { OssHelper } from '@/common/sockets/utils/OssHelper'
 	import CustomSnowflake from "@/utils/CustomSnowflake"
-	import * as AQChatMSg from '../../common/sockets/protocol/AQChatMsgProtocol_pb';
+	import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb';
 	import AQSender from '@/common/sockets/AQSender'
 	import MsgTypeEnum from "@/enums/MsgTypeEnum"
 	import MsgStatusEnum from "@/enums/MsgStatusEnum"
@@ -72,8 +72,6 @@
 	const epoch = +new Date();
 	const customSnowflake = new CustomSnowflake(1, epoch);
 	const {
-		sendMessageFun,
-		reciveMessageFun,
 		RecoverUserFun,
 		asyncRoomMessageFun
 	} = useChart()
@@ -87,7 +85,7 @@
 	const editorRef = ref(null)
 	const msgStr = ref('')
 
-	let msgList : any = ref([])
+	let msgList : any = appStore.msgList
 
 	const showOther = () => {
 		otherShow.value = !otherShow.value
@@ -97,7 +95,6 @@
 	}
 
 	const textareaFocus = () => {
-		console.log("聚焦");
 		otherShow.value = false;
 		emojiShow.value = false;
 	}
@@ -129,9 +126,6 @@
 		AQSender.getInstance().sendMsg(
 			AQChatMSg.default.MsgCommand.SYNC_CHAT_RECORD_CMD, syncChatRecord
 		)
-
-
-
 	}
 
 	// 上传图片
@@ -320,21 +314,9 @@
 
 
 	onMounted(() => {
-		// 注册消息回调
-		reciveMessageFun()
-		let message = new AQChatMSg.default.SyncChatRecordCmd([appStore.roomInfo.roomId])
-		asyncRoomMessageFun(message)
 		uni.setNavigationBarTitle({
-			title: appStore.roomInfo.roomName
+			title: `聊天房：${appStore.roomInfo.roomName}`
 		})
-		// msgList.value = appStore.msgList
-		// setTimeout(() => {
-		// 	scrollToBottom()
-		// 	OssHelper.getInstance().init(AQChatMSg.default.MsgType.IMAGE, () => { })
-		// }, 500)
-		// setTimeout(() => {
-		// 	OssHelper.getInstance().init(AQChatMSg.default.MsgType.VIDEO, () => { })
-		// }, 500)
 	})
 </script>
 
@@ -389,7 +371,7 @@
 				padding: 16rpx 30rpx;
 				width: 100%;
 				position: fixed;
-				background: var(--input-out-bg);
+				background: #fff;
 			}
 
 			.uni-textarea {
