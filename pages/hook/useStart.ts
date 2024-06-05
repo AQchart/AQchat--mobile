@@ -1,10 +1,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import multiavatar from "@multiavatar/multiavatar/esm"
-import AQSender from '../../common/sockets/AQSender'
-import AQMsgHandlerFactory from '../../common/sockets/msghandler/AQMsgHandlerFactory'
-import AQChatMsgProtocol_pb, * as AQChatMSg from '../../common/sockets/protocol/AQChatMsgProtocol_pb'
-import CallbackMethodManager from '../../common/sockets/CallbackMethodManager';
-import { useAppStore } from '../../store/modules/app'
+import AQSender from '@/common/sockets/AQSender'
+import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb'
+import { useAppStore } from '@/store/modules/app'
 
 
 export default () => {
