@@ -1,11 +1,11 @@
 <template>
 	<u-popup class="popup-custom" v-model="showPopup" mode="bottom" :mask-close-able="false" height="50%" closeable>
 		<u-form class="form" :model="roomForm" ref="formDataRef" label-width="70px">
-			<u-form-item v-if="created" label="房间名" prop="groupName">
-				<u-input class="input" v-model="roomForm.roomName" placeholder="请输入房间名称" />
-			</u-form-item>
 			<u-form-item label="房间号" prop="groupId">
 				<u-input class="input" v-model="roomForm.roomNo" placeholder="请输入房间号" />
+			</u-form-item>
+			<u-form-item v-if="created" label="房间名" prop="groupName">
+				<u-input class="input" v-model="roomForm.roomName" placeholder="请输入房间名称" />
 			</u-form-item>
 		</u-form>
 		<u-button class="submit-btn" type="primary" @click="submit">{{ created ? '创建': '加入' }}</u-button>
