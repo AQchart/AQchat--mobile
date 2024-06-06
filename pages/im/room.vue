@@ -6,7 +6,7 @@
 			<view id="msglistview" class="chat-body">
 				<!-- 聊天记录 -->
 				<render-msg v-for="msg in msgList" :key="msg.msgId" :message="msg"
-					:currentUser="appStore.userInfo"></render-msg>
+					:currentUser="appStore.userInfo" @rewrite='rewriteFun'></render-msg>
 			</view>
 		</scroll-view>
 		<!-- 底部消息发送栏 -->
@@ -194,11 +194,16 @@
 			}
 		});
 	}
+	// 表情包
 	const showEmoji = () => {
 		emojiShow.value = !emojiShow.value
 		if (emojiShow.value) {
 			otherShow.value = false
 		}
+	}
+	// 重新编辑
+	const rewriteFun =(ext:any)=>{
+	  editorRef.value && editorRef.value.rewriteFun(ext)
 	}
 
 

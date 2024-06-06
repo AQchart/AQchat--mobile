@@ -8,7 +8,7 @@
 		:class="['msg-item',message.msgType == MsgTypeEnum.TIP? 'center' : currentUser.userId == message.user.userId ? 'right':'left']">
 		<view v-if="message.msgType == MsgTypeEnum.TIP" class="msg-tip msg-box">
 			{{ message.msg }}
-			<text v-if="message.msg.indexOf('撤回')!=-1 && message.ext" class='rewrite-box' @click='rewriteFun(item.ext)'>
+			<text v-if="message.msg.indexOf('撤回')!=-1 && message.ext" class='rewrite-box' @click='rewriteFun(message.ext)'>
 				重新编辑
 			</text>
 		</view>
@@ -16,15 +16,21 @@
 			<view class="avatar" v-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
 			<view class="message">
 				<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">
-					{{ message.user.userName }}</view>
+					{{ message.user.userName }}
+				</view>
 				<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
-					<component :is="getMessageType()" v-bind="getProps"></component>
+					<component :is="getMessageType()" v-bind="getProps" @longpress.native="onLongPress" @tap.native="listTap">
+					</component>
 				</view>
 			</view>
 			<view class="avatar" v-if="currentUser.userId == message.user.userId" v-html="message.user.userAvatar"></view>
 			<loading v-if="message.msgStatus === MsgStatusEnum.PENDING" class="mine-load" />
 		</view>
-		
+		<view class="shade" v-show="showShade" @tap="hidePop">
+			<view class="pop" :style="popStyle" :class="{'show':showPop}">
+				<view @click="recallMsgFun">撤回</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -37,6 +43,10 @@
 	import video from './video.vue'
 	import MsgTypeEnum from "@/enums/MsgTypeEnum"
 	import MsgStatusEnum from "@/enums/MsgStatusEnum"
+	import { ref, nextTick, defineEmits } from 'vue'
+	import AQSender from '@/common/sockets/AQSender'
+	import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb';
+	import { useAppStore } from '@/store/modules/app'
 	enum messageType {
 		text = 0,
 		image = 1,
@@ -55,9 +65,96 @@
 			default: () => { }
 		}
 	})
-
+	const emits = defineEmits(['rewrite'])
+	const appStore = useAppStore()
 	// 解析消息
 	const { message, currentUser } = props
+	/* 窗口尺寸 */
+	const winSize = ref({ width: 0, height: 0 });
+	/* 显示遮罩 */
+	const showShade = ref(false);
+	/* 显示操作弹窗 */
+	const showPop = ref(false)
+	/* 弹窗定位样式 */
+	const popStyle = ref("")
+
+	onMounted(() => {
+		getWindowSize();
+
+		// #ifdef H5
+		document.onLong = function (e) {
+			var e = e || window.event;
+			e.preventDefault();
+		};
+		// #endif
+	})
+
+	/* 列表触摸事件 */
+	const listTap = () => {
+		/* 因弹出遮罩问题，所以需要在遮罩弹出的情况下阻止列表事件的触发 */
+		if (showShade.value) {
+			return;
+		}
+
+		console.log("列表触摸事件触发")
+	}
+
+	/* 获取窗口尺寸 */
+	const getWindowSize = () => {
+		uni.getSystemInfo({
+			success: (res) => {
+				winSize.value.width = res.windowWidth
+				winSize.value.height = res.windowHeight
+			}
+		})
+	}
+
+	// 撤回消息
+	const recallMsgFun = () => {
+		let model = new AQChatMSg.default.RecallMsgCmd();
+		model.setRoomid(appStore.roomInfo.roomId);
+		model.setMsgid(message.msgId);
+		AQSender.getInstance().sendMsg(
+			AQChatMSg.default.MsgCommand.RECALL_MSG_CMD, model
+		)
+		hidePop();
+	}
+
+	/* 长按监听 */
+	const onLongPress = (e : any) => {
+		console.log("长按");
+		if(message?.user?.userId != appStore.userInfo.userId){
+			return
+		}
+		let [touches, style, index] = [e.touches[0], "", e.currentTarget.dataset.index];
+
+		/* 因 非H5端不兼容 style 属性绑定 Object ，所以拼接字符 */
+		if (touches.clientY > (winSize.value.height / 2)) {
+			style = `bottom:${winSize.value.height - touches.clientY}px;`;
+		} else {
+			style = `top:${touches.clientY}px;`;
+		}
+		if (touches.clientX > (winSize.value.width / 2)) {
+			style += `right:${winSize.value.width - touches.clientX}px`;
+		} else {
+			style += `left:${touches.clientX}px`;
+		}
+
+		popStyle.value = style;
+		showShade.value = true;
+		nextTick(() => {
+			setTimeout(() => {
+				showPop.value = true;
+			}, 10);
+		});
+	}
+	/* 隐藏弹窗 */
+	const hidePop = () => {
+		showPop.value = false;
+		setTimeout(() => {
+			showShade.value = false;
+		}, 250);
+	}
 
 	// 获取消息组件
 	const getMessageType = () => {
@@ -76,6 +173,7 @@
 	// 重新编辑
 	const rewriteFun = (ext : any) => {
 		// imCharRef.value && imCharRef.value.rewriteFun(ext)
+		emits("rewrite", ext)
 	}
 
 	// 获取消息组件props
@@ -93,12 +191,54 @@
 				return {}
 		}
 	})
-
-	onMounted(() => {
-	})
 </script>
 
 <style lang="scss" scoped>
+	/* 遮罩 */
+	.shade {
+		position: fixed;
+		z-index: 100;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		-webkit-touch-callout: none;
+
+		.pop {
+			position: fixed;
+			z-index: 101;
+			width: 200upx;
+			box-sizing: border-box;
+			font-size: 28upx;
+			text-align: left;
+			color: #333;
+			background-color: #fff;
+			box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+			line-height: 80upx;
+			transition: transform 0.15s ease-in-out 0s;
+			user-select: none;
+			-webkit-touch-callout: none;
+			transform: scale(0, 0);
+
+			&.show {
+				transform: scale(1, 1);
+			}
+
+			&>view {
+				padding: 0 20upx;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				user-select: none;
+				-webkit-touch-callout: none;
+
+				&:active {
+					background-color: #f3f3f3;
+				}
+			}
+		}
+	}
+
 	.msg-item {
 		display: flex;
 		padding: 23rpx 30rpx;
@@ -116,11 +256,19 @@
 		vertical-align: middle;
 		display: inline-block;
 	}
+
 	.msg-tip {
 		text-align: center;
 		font-size: 24rpx;
 		color: #ccc;
 		margin: 0 auto;
+
+		.rewrite-box {
+			margin-left: 10px;
+			color: var(--im-primary);
+			position: relative;
+			cursor: pointer;
+		}
 	}
 
 	.message-item {
@@ -128,7 +276,7 @@
 		position: relative;
 		display: flex;
 		flex-direction: row;
-		
+
 		.mine-load {
 			position: absolute;
 			left: -20rpx;
@@ -150,9 +298,12 @@
 			margin-right: 20px;
 			margin-left: 20px;
 			flex-direction: column;
-			.name{
-				color: var(--txt-color);;
+
+			.name {
+				color: var(--txt-color);
+				;
 			}
+
 			.message-box {
 				margin-top: 5px;
 				background-color: var(--im-txt-bg);

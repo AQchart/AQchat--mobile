@@ -57,7 +57,34 @@
 		}
 	}
 	const createRoom = () => {
-		roomDialogRef.value.show(true)
+		if(appStore.roomInfo.roomId){
+			uni.showModal({
+				title: '系统提示',
+				content: `当前已加入聊天房【${appStore.roomInfo.roomName}】,是否恢复`,
+				confirmText: '恢复房间',
+				cancelText: '退出不管',
+				success: (res) => {
+					if (res.confirm) {
+						uni.navigateTo({
+							url:"/pages/im/room"
+						})
+					} else if (res.cancel) {
+						let model = new AQChatMSg.default.LeaveRoomCmd();
+						model.setRoomid(appStore.roomInfo.roomId);
+						AQSender.getInstance().sendMsg(
+							AQChatMSg.default.MsgCommand.LEAVE_ROOM_CMD, model
+						)
+						setTimeout(() => {
+							appStore.resetRoomInfo();
+							roomDialogRef.value.show(true)
+						}, 100)
+					}
+				}
+			});
+		}else{
+			roomDialogRef.value.show(true)
+		}
+		
 	}
 </script>
 

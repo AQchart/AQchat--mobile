@@ -12,7 +12,7 @@
 
 	const inputRef = ref(null)
 
-	const emits = defineEmits(['input'])
+	const emits = defineEmits(['input','focus'])
 
 	const getInnerHtml = () => {
 		return inputRef.value.innerHTML;
@@ -40,6 +40,11 @@
 		setInnerHtml(html)
 		inputChange(getInnerHtml())
 	}
+	
+	// 重新编辑
+	const rewriteFun = (content:string)=>{
+		inputRef.value.innerHTML += content
+	}
 
 	const clear = () => {
 		setInnerHtml('')
@@ -47,7 +52,8 @@
 
 	defineExpose({
 		insertImage,
-		clear
+		clear,
+		rewriteFun
 	})
 </script>
 

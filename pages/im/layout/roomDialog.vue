@@ -53,9 +53,11 @@
 			if (valid && created.value) {
 				console.log("created")
 				createRoomFun()
+				hide()
 			} else if (valid && !created.value) {
 				console.log("join")
 				joinRoomFun()
+				hide()
 			}
 		})
 	}
