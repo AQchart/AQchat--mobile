@@ -5,8 +5,8 @@
 			<!-- 聊天主体 -->
 			<view id="msglistview" class="chat-body">
 				<!-- 聊天记录 -->
-				<render-msg v-for="msg in msgList" :key="msg.msgId" :message="msg"
-					:currentUser="appStore.userInfo" @rewrite='rewriteFun'></render-msg>
+				<render-msg v-for="msg in msgList" :key="msg.msgId" :message="msg" :currentUser="appStore.userInfo"
+					@rewrite='rewriteFun'></render-msg>
 			</view>
 		</scroll-view>
 		<!-- 底部消息发送栏 -->
@@ -87,19 +87,23 @@
 
 	let msgList : any = appStore.msgList
 
+	onMounted(() => {
+		// 恢复房间进入时消息同步
+		if(appStore.websocketStatus){
+			syncChatRecordFun();
+		}
+	})
+
 	const showOther = () => {
 		otherShow.value = !otherShow.value
 		if (otherShow.value) {
 			emojiShow.value = false
 		}
 	}
-
 	const textareaFocus = () => {
 		otherShow.value = false;
 		emojiShow.value = false;
 	}
-
-
 	const selectIcon = (icon : any) => {
 		let imgObject = {
 			src: icon.icon,
@@ -114,11 +118,9 @@
 			})
 		}
 	}
-
 	const onEditorInput = (html : any) => {
 		msgStr.value = html
 	}
-
 	// 发送消息同步指令
 	const syncChatRecordFun = () => {
 		let syncChatRecord = new AQChatMSg.default.SyncChatRecordCmd();
@@ -127,7 +129,6 @@
 			AQChatMSg.default.MsgCommand.SYNC_CHAT_RECORD_CMD, syncChatRecord
 		)
 	}
-
 	// 上传图片
 	const uploadImage = () => {
 		uni.chooseImage({
@@ -154,7 +155,6 @@
 			}
 		});
 	}
-
 	// 上传文件到服务器
 	const uploadToOss = (msgInfo : Msg, file : File) => {
 		OssHelper.getInstance().init(msgInfo.msgType, () => {
@@ -168,7 +168,6 @@
 				});
 		});
 	}
-
 	// 上传视频
 	const uploadVideo = () => {
 		uni.chooseVideo({
@@ -202,11 +201,9 @@
 		}
 	}
 	// 重新编辑
-	const rewriteFun =(ext:any)=>{
-	  editorRef.value && editorRef.value.rewriteFun(ext)
+	const rewriteFun = (ext : any) => {
+		editorRef.value && editorRef.value.rewriteFun(ext)
 	}
-
-
 
 	watch(appStore.msgList, (newV) => {
 		msgList.value = newV;
@@ -229,15 +226,9 @@
 		}
 	})
 
-
-
 	const showSend = computed(() => {
 		return msgStr.value.length > 0
 	})
-
-	const rpxTopx = (px : number) => {
-		return uni.upx2px(px)
-	}
 
 	const windowHeight = computed(() => {
 		let px = uni.getSystemInfoSync().windowHeight;
