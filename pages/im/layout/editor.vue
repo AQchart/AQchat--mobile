@@ -7,33 +7,62 @@
 
 <script lang="ts" setup>
 	import { ref, defineProps, defineExpose, defineEmits } from 'vue'
+	/**
+	 * placeholder 输入提示文字
+	 */
 	const props = defineProps(['placeholder'])
 	const { placeholder } = props
-
+	
+	/**
+	 * 输入框el
+	 */
 	const inputRef = ref(null)
 
+	/**
+	 * emit事件
+	 * input 输入文字事件
+	 * focus 点击输入框事件
+	 */
 	const emits = defineEmits(['input','focus'])
 
+	/**
+	 * 获取输入框的值
+	 */
 	const getInnerHtml = () => {
 		return inputRef.value.innerHTML;
 	}
 
+	/**
+	 * 设置输入框的值
+	 */
 	const setInnerHtml = (html : any) => {
 		inputRef.value.innerHTML = html
 	}
-
+	
+	/**
+	 * 编辑器input事件
+	 */
 	const inputText = (e : any) => {
 		inputChange(inputRef.value == null ? "" : inputRef.value.innerHTML)
 	}
 
+	/**
+	 * 回调输入事件返回输入的值 使用v-model接收
+	 */
 	const inputChange = (html : any) => {
 		emits('input', html)
 	}
 	
+	/**
+	 * 聚焦事件
+	 */
 	const inputFocus = () => {
 		emits('focus')
 	}
 
+	/**
+	 * 插入表情图片
+	 */
 	const insertImage = (obj : any) => {
 		let img = `<img src="${obj.src}" alt="${obj.alt}" class='emo-image' />`
 		let html = getInnerHtml() + img
@@ -41,15 +70,23 @@
 		inputChange(getInnerHtml())
 	}
 	
-	// 重新编辑
+	/**
+	 * 重新编辑
+	 */
 	const rewriteFun = (content:string)=>{
 		inputRef.value.innerHTML += content
 	}
 
+	/**
+	 * 清空输入框内容
+	 */
 	const clear = () => {
 		setInnerHtml('')
 	}
 
+	/**
+	 * 向外暴露函数
+	 */
 	defineExpose({
 		insertImage,
 		clear,
