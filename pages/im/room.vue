@@ -69,8 +69,7 @@
 	import Msg from "@/class/Msg"
 
 	const appStore = useAppStore()
-	const epoch = +new Date();
-	const customSnowflake = new CustomSnowflake(1, epoch);
+	const customSnowflake = new CustomSnowflake(1);
 	const {
 		RecoverUserFun,
 		asyncRoomMessageFun
