@@ -4,9 +4,9 @@
 			<u-col span="3" style="text-align: center;">
 				<view @click="leaveRoom"><u-icon name="arrow-left"></u-icon>离开</view>
 			</u-col>
-			<u-col span="6" style="text-align: center;">
-				房间：{{ appStore.roomInfo.roomName }}({{ appStore.roomInfo.roomNo }})
-				<u-icon color="#409eff" @click="show = true"
+			<u-col span="6" @click="show = true" style="text-align: center; white-space: nowrap; overflow:hidden;text-overflow:ellipsis;">
+				{{ appStore.roomInfo.roomName }}({{ appStore.roomInfo.roomNo }})
+				<u-icon color="#409eff"
 					name="account-fill"></u-icon>({{ appStore.memberList.length }})
 			</u-col>
 			<u-col span="3" style="text-align: center; color: red;">
@@ -59,23 +59,25 @@
 	const leaveRoom = () => {
 		leaveRoomFun()
 	}
-	
+
 	const background = {
 		backgroundColor: 'var(--chat-tab-bar-bg)'
 	}
-	
 </script>
 
 <style lang="scss" scoped>
 	.top-bar {
 		text-align: center;
 		line-height: 44px;
+		color: var(--txt-color);
+		background-color: var(--bg-color);
 	}
 
 	.member {
 		min-width: 500rpx;
 		overflow: hidden;
-
+		color: var(--txt-color);
+		background-color: var(--bg-color);
 		.title {
 			position: relative;
 			top: 5px;

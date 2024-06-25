@@ -83,6 +83,9 @@
 				color: var(--file-card-txt);
 				text-align: left;
 				line-height: 60rpx;
+				white-space: nowrap;
+				overflow:hidden;
+				text-overflow:ellipsis;
 			}
 		}
 
@@ -107,6 +110,8 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		overflow:hidden;
+		text-overflow:ellipsis;
 		
 		img {
 			margin-top: 200rpx;
@@ -117,7 +122,11 @@
 		}
 		
 		.name {
-			font-size: 60rpx;
+			width: 100%;
+			font-size: 40rpx;
+			text-align: center;
+			overflow:hidden;
+			text-overflow:ellipsis;
 		}
 	}
 	
@@ -126,6 +135,8 @@
 			width: 60% !important;
 			height: 40% !important;
 			border-radius: 10px;
+			color: var(--txt-color);
+			background-color: var(--bg-color);
 		}
 	}
 </style>

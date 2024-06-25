@@ -453,8 +453,8 @@
 					margin-left: 5px;
 					width: 20px;
 					height: 20px;
-					color: #fff;
-					font-size: 17px;
+					color: var(--send-btn-color);
+					font-size: 20px;
 					border-radius: 50px;
 					line-height: 20px;
 					text-align: center;
@@ -476,7 +476,7 @@
 				padding: 16rpx 30rpx;
 				width: 100%;
 				position: fixed;
-				background: #fff;
+				background: var(--chat-tab-bar-bg);
 			}
 
 			.send-btn {

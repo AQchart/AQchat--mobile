@@ -27,6 +27,9 @@
     --file-card-desc:#9b9b9b;
     --member-boder:rgba(204,204,204,.3);
 	--chat-tab-bar-bg: #e6e6e6;
+	--text-message-color: #000;
+	--send-btn-bg: #fff;
+	--send-btn-color: #4D5FFF;
 }
 
 .dark-theme {
@@ -49,7 +52,7 @@
 	--im-bg2:#2c3036;
 	--im-shadow1:#23262b;
 	--im-shadow2:#2f343a;
-	--im-txt-bg:#ffffff;
+	--im-txt-bg:#3e3e3e;
 	--im-nav-bg:#292D32;
 	--im-head-bg:#fff;
 	--im-head-txt:#fff;
@@ -57,5 +60,8 @@
 	--file-card-txt:#333333;
 	--file-card-desc:#ccc;
 	--member-boder:rgba(0, 0, 0, 0.2);
-	--chat-tab-bar-bg: #fff;
+	--chat-tab-bar-bg: #c1c1c1;
+	--text-message-color: #fff;
+	--send-btn-bg: #4D5FFF;
+	--send-btn-color: #fff
 }
