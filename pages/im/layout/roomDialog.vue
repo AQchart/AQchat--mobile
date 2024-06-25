@@ -1,11 +1,19 @@
 <template>
 	<u-popup class="popup-custom" v-model="showPopup" mode="bottom" :mask-close-able="false" height="50%" closeable>
 		<u-form class="form" :model="roomForm" ref="formDataRef" label-width="70px">
-			<u-form-item label="房间号" prop="groupId">
+			<u-form-item label="房间号" prop="roomNo">
 				<u-input class="input" v-model="roomForm.roomNo" placeholder="请输入房间号" />
 			</u-form-item>
-			<u-form-item v-if="created" label="房间名" prop="groupName">
+			<u-form-item v-if="created" label="房间名" prop="roomName">
 				<u-input class="input" v-model="roomForm.roomName" placeholder="请输入房间名称" />
+			</u-form-item>
+			<u-form-item v-if="created" prop="ai" label-width="170px" label="是否开启AI助手">
+				<u-switch v-model="roomForm.ai" :active-value="1" :inactive-value="0" active-color="#409eff"
+					inactive-color="#e6effb"></u-switch>
+			</u-form-item>
+			<u-form-item v-if="created" prop="history" label-width="170px" label="是否支持查看历史消息">
+				<u-switch v-model="roomForm.history" :active-value="1" :inactive-value="0" active-color="#409eff"
+					inactive-color="#e6effb"></u-switch>
 			</u-form-item>
 		</u-form>
 		<u-button class="submit-btn" type="primary" @click="submit">{{ created ? '创建': '加入' }}</u-button>
@@ -13,12 +21,11 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, reactive, defineExpose, nextTick } from 'vue';
+	import { ref, defineExpose, nextTick } from 'vue';
 	import useRoom from '../hook/useRoom'
 	const created = ref(false);
 	const showPopup = ref(false);
-	const formDataRef = ref(null);
-
+	const formDataRef = ref();
 
 	const {
 		roomForm,
@@ -26,36 +33,49 @@
 		joinRoomFun,
 		createRoomFun
 	} = useRoom()
-	const rules = reactive({
+	
+	// 校验规则
+	const rules = {
 		roomName: [{ required: true, message: '请输入房间名', trigger: ['change', 'blur'] },
-		{ min: 1, max: 10, message: '房间名长度为1-10字符' }],
+		{ min: 4, max: 10, message: '房间名长度为4-10字符' }],
 		roomNo: [{ required: true, message: '请输入房间号', trigger: ['change', 'blur'] },
-		{ pattern: /[1-9]\d*/, message: "请输入数字", trigger: ['change', 'blur'] },
-		{ min: 1, max: 10, message: '房间号长度为1-10字符', trigger: ['change', 'blur'] }]
-	});
+		{
 
+			pattern: /^[0-9]*$/g, transform(value : any) {
+				return String(value);
+			}, message: "请输入4-10数字", trigger: ['change', 'blur']
+
+		},
+		{ min: 4, max: 10, message: '房间号长度为4-10数字', trigger: ['change', 'blur'] }]
+	}
+	
+	// 显示输入框
 	const show = (create : boolean) => {
 		created.value = create
 		showPopup.value = true
 		roomForm.roomName = ''
 		roomForm.roomNo = null
+		roomForm.history = 1
+		roomForm.ai = 0
 		nextTick(() => {
-			formDataRef.value.setRules(rules)
+			if (formDataRef.value) {
+				formDataRef.value.setRules(rules)
+			}
 		})
 	};
-
+	
+	// 隐藏输入框
 	const hide = () => {
 		showPopup.value = false
 	};
 
+	// 提交
 	const submit = () => {
-		formDataRef.value.validate((valid : boolean) => {
+		formDataRef.value.validate((valid : any) => {
 			if (valid && created.value) {
-				console.log("created")
 				createRoomFun()
 				hide()
 			} else if (valid && !created.value) {
-				console.log("join")
 				joinRoomFun()
 				hide()
 			}
@@ -71,8 +91,8 @@
 <style lang="scss" scoped>
 	.popup-custom {
 		::v-deep .u-drawer-content {
-			border-top-right-radius: 20px;
-			border-top-left-radius: 20px;
+			border-top-right-radius: 10px;
+			border-top-left-radius: 10px;
 		}
 	}
 

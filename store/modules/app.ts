@@ -11,6 +11,7 @@ interface RoomInfo {
 	roomId : string,
 	roomNo : string,
 	roomName : string,
+	ai: number| string
 }
 
 
@@ -31,7 +32,11 @@ interface AppState {
 	// 声音dom
 	soundDom : any,
 	// 消息id，更新用于监听变化，判断是否需要消息触底
-	msgId : number | string
+	msgId : number | string,
+	// ai消息更新，判断是否需要触底
+	aiCode : number | string,
+	// 强制触底标识
+	forceBottom : number | string,
 }
 
 const customSnowflake = new CustomSnowflake(1);
@@ -55,13 +60,16 @@ export const useAppStore = defineStore('app', {
 			roomId: '',
 			roomNo: '',
 			roomName: '',
+			ai: ''
 		},
 		msgList: [],
 		msgStatusTimer: {},
 		memberList: [],
 		soundActive: false,
 		soundDom: null,
-		msgId: ''
+		msgId: '',
+		aiCode: '',
+		forceBottom: ''
 	}),
 	getters: {
 		theme: (state) => state.themeDark,
@@ -69,6 +77,12 @@ export const useAppStore = defineStore('app', {
 	actions: {
 		setMsgId(msgId : number | string) {
 			this.msgId = msgId;
+		},
+		setAiCode(code : number | string) {
+			this.aiCode = code;
+		},
+		setForceBottom(code : number | string) {
+			this.forceBottom = code
 		},
 		setTheme(theme : boolean) {
 			this.themeDark = theme
@@ -103,7 +117,7 @@ export const useAppStore = defineStore('app', {
 			this.msgList = []
 		},
 		setMsgRecord(msg : Msg) {
-			if(!this.msgList.find(x=>x.msgId == msg.msgId)?.msgId){
+			if (!this.msgList.find(x => x.msgId == msg.msgId)?.msgId) {
 				this.msgList.unshift(msg)
 			}
 		},
@@ -127,7 +141,7 @@ export const useAppStore = defineStore('app', {
 			}
 			this.msgList = []
 		},
-		sendInfo(msg : string, msgType : MsgTypeEnum) {
+		sendInfo(msg : string, msgType : MsgTypeEnum, ext : string = '') {
 			const msgId = customSnowflake.nextId();
 			const msgInfo : Msg = {
 				user: {
@@ -139,7 +153,8 @@ export const useAppStore = defineStore('app', {
 				msgId: msgId,
 				msgType: msgType,
 				msg: msg,
-				msgStatus: MsgStatusEnum.PENDING
+				msgStatus: MsgStatusEnum.PENDING,
+				ext: ext
 			}
 			this.sendInfoLocalFun(msgInfo)
 

@@ -7,7 +7,7 @@ import Msg from "@/class/Msg"
 import MsgTypeEnum from "@/enums/MsgTypeEnum"
 import MsgStatusEnum from "@/enums/MsgStatusEnum"
 import CallbackMethodManager from '@/common/sockets/CallbackMethodManager';
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 export default () => {
 	const appStore = useAppStore()
@@ -63,6 +63,9 @@ export default () => {
 							url: "/pages/im/room"
 						})
 						appStore.setRoomInfo(result);
+						if(result.ai === 1) {
+							initAiFun()
+						}
 						break;
 					// 加入房间回调
 					case AQChatMSg.default.MsgCommand.JOIN_ROOM_ACK:
@@ -70,6 +73,9 @@ export default () => {
 							url: "/pages/im/room"
 						})
 						appStore.setRoomInfo(result);
+						if(result.ai === 1) {
+							initAiFun()
+						}
 						break;
 					// 恢复用户连接
 					case AQChatMSg.default.MsgCommand.RECOVER_USER_ACK:
@@ -121,6 +127,10 @@ export default () => {
 					// 消息撤回通知
 					case AQChatMSg.default.MsgCommand.RECALL_MSG_NOTIFY:
 						recallMsgNotifyFun(result)
+						break;
+					// 流消息
+					case AQChatMSg.default.MsgCommand.STREAM_MSG_NOTIFY:
+						streamMsgNotifyFun(result)
 						break;
 					// 异常消息回调
 					case AQChatMSg.default.MsgCommand.EXCEPTION_MSG:
@@ -183,6 +193,31 @@ export default () => {
 			appStore.removeMsg(result.msgId, msg);
 		}
 	}
+
+	// ai流消息
+	const streamMsgNotifyFun = (result : any) => {
+		let currentMsg = appStore.msgList.find(x => x.msgId === result.msgId);
+		if (currentMsg) {
+			currentMsg.msg += result.msg
+			appStore.setAiCode(+new Date() + '')
+		} else {
+			const msg : Msg = {
+				user: {
+					userId: result.userId,
+					userAvatar: result.userAvatar,
+					userName: result.userName,
+				},
+				roomId: result.roomId,
+				msgType: MsgTypeEnum.TEXT,
+				msg: result.msg,
+				msgId: result.msgId
+			}
+			appStore.sendInfoLocalFun(msg)
+			appStore.setMsgId(result.msgId)
+		}
+	}
+
+
 	// 房间成员离线
 	const offlineNotyfyFun = (result : any) => {
 		console.log("房间成员离线", result);
@@ -282,6 +317,7 @@ export default () => {
 			const msg : Msg = result[i]
 			appStore.setMsgRecord(msg)
 		}
+		initAiFun()
 	}
 	// 用户退出登录
 	const userLogoutFun = (result : any) => {
@@ -292,6 +328,23 @@ export default () => {
 			})
 		}
 	}
+
+	// 发送ai提示
+	const initAiFun = () => {
+		const msg : Msg = {
+			roomId: appStore.roomInfo.roomId,
+			msgId: +new Date() + '',
+			msgType: MsgTypeEnum.TEXT,
+			msg: `你好，我是小Q，遇到不懂的问题，可以尝试在输入框<span style='color:var(--im-primary)'>@小Q</span>，我会随时替你解答！`,
+			user: {
+				userId: 'AQChatHelper',
+				userAvatar: 'https://aqchat.oss-cn-shenzhen.aliyuncs.com/avatar/AQChatAI.png',
+				userName: '小Q',
+			},
+		}
+		appStore.sendInfoLocalFun(msg)
+	}
+
 	// 接收广播消息
 	const broadcastMsgFun = (result : any) => {
 		// console.log("接收广播消息",result);
@@ -338,12 +391,12 @@ export default () => {
 	}
 	// 恢复用户登录
 	const recoverUserFun = (result : any) => {
-		console.log('恢复用户登录');
 		uni.hideLoading();
 		appStore.setRoomInfo({
 			roomId: result.roomId || '',
 			roomNo: result.roomNo || '',
-			roomName: result.roomName || ''
+			roomName: result.roomName || '',
+			ai:result.ai || 0,
 		})
 	}
 	// 用户登录

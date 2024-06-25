@@ -8,22 +8,30 @@
 		:class="['msg-item',message.msgType == MsgTypeEnum.TIP? 'center' : currentUser.userId == message.user.userId ? 'right':'left']">
 		<view v-if="message.msgType == MsgTypeEnum.TIP" class="msg-tip msg-box">
 			{{ message.msg }}
-			<text v-if="message.msg.indexOf('撤回')!=-1 && message.ext" class='rewrite-box' @click='rewriteFun(message.ext)'>
+			<text v-if="message.msg.indexOf('撤回')!=-1 && message.ext" class='rewrite-box'
+				@click='rewriteFun(message.ext)'>
 				重新编辑
 			</text>
 		</view>
 		<view v-else class="message-item">
-			<view class="avatar" v-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
+			<img class="avatar" :src="message.user.userAvatar" alt="[头像]"
+				v-if="currentUser.userId != message.user.userId && message.user.userId== 'AQChatHelper'"/>
+			<view class="avatar" v-else-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
 			<view class="message">
 				<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">
 					{{ message.user.userName }}
 				</view>
-				<view class="message-box" :class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
-					<component :is="getMessageType()" v-bind="getProps" @longpress.native="onLongPress" @tap.native="listTap">
+				<view class="message-box"
+					:class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
+					<component :is="getMessageType()" v-bind="getProps" @longpress.native="onLongPress"
+						@tap.native="listTap">
 					</component>
 				</view>
 			</view>
-			<view class="avatar" v-if="currentUser.userId == message.user.userId" v-html="message.user.userAvatar"></view>
+			<img class="avatar" :src="message.user.userAvatar" alt="[头像]"
+				v-if="currentUser.userId == message.user.userId && message.user.userId== 'AQChatHelper'"/>
+			<view class="avatar" v-else-if="currentUser.userId == message.user.userId"
+				v-html="message.user.userAvatar"></view>
 			<loading v-if="message.msgStatus === MsgStatusEnum.PENDING" class="mine-load" />
 		</view>
 		<view class="shade" v-show="showShade" @tap="hidePop">
@@ -41,18 +49,13 @@
 	import image from './image.vue'
 	import voice from './voice.vue'
 	import video from './video.vue'
+	import file from './file.vue'
 	import MsgTypeEnum from "@/enums/MsgTypeEnum"
 	import MsgStatusEnum from "@/enums/MsgStatusEnum"
 	import { ref, nextTick, defineEmits } from 'vue'
 	import AQSender from '@/common/sockets/AQSender'
 	import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb';
 	import { useAppStore } from '@/store/modules/app'
-	enum messageType {
-		text = 0,
-		image = 1,
-		voice = 2,
-		video = 3
-	}
 
 	// props
 	const props = defineProps({
@@ -123,7 +126,7 @@
 	/* 长按监听 */
 	const onLongPress = (e : any) => {
 		console.log("长按");
-		if(message?.user?.userId != appStore.userInfo.userId){
+		if (message?.user?.userId != appStore.userInfo.userId) {
 			return
 		}
 		let [touches, style, index] = [e.touches[0], "", e.currentTarget.dataset.index];
@@ -159,14 +162,17 @@
 	// 获取消息组件
 	const getMessageType = () => {
 		switch (message.msgType) {
-			case messageType.text:
+			case MsgTypeEnum.TEXT:
 				return text
-			case messageType.image:
+			case MsgTypeEnum.IMAGE:
 				return image
-			case messageType.voice:
+			case MsgTypeEnum.VOICE:
 				return voice
-			case messageType.video:
+			case MsgTypeEnum.VIDEO:
 				return video
+			case MsgTypeEnum.FILE:
+				return file
+			default: break;
 		}
 	}
 
@@ -179,14 +185,16 @@
 	// 获取消息组件props
 	const getProps = computed(() => {
 		switch (message.msgType) {
-			case messageType.text:
-				return { text: message.msg }
-			case messageType.image:
+			case MsgTypeEnum.TEXT:
+				return { text: message.msg, userId: message.user.userId }
+			case MsgTypeEnum.IMAGE:
 				return { src: message.msg }
-			case messageType.voice:
+			case MsgTypeEnum.VOICE:
 				return { src: message.msg }
-			case messageType.video:
+			case MsgTypeEnum.VIDEO:
 				return { src: message.msg }
+			case MsgTypeEnum.FILE:
+				return { src: message.msg, ext: message.ext }
 			default:
 				return {}
 		}

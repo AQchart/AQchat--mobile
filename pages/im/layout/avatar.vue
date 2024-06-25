@@ -2,13 +2,17 @@
 	<view class="user-avatar">
 		<view class="avatar" v-html="appStore.userInfo.userAvatar"></view>
 		<span class="user-name">{{ daySpace }}：{{ appStore.userInfo.userName }}</span>
-		<view class="empty"></view>
+		<view class="empty">
+			<view class="logout"><u-icon  @click="quit" custom-prefix="custom-icon" name=" icon-enter"></u-icon>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script setup lang="ts">
 	import { ref, onMounted } from 'vue'
 	import { useAppStore } from '../../../store/modules/app'
+	import useRoom from '../hook/useRoom'
 	const appStore = useAppStore()
 
 	const daySpace = ref('')
@@ -18,6 +22,12 @@
 		daySpace.value = (hours >= 6 && hours < 10) ? "早上好" :
 			(hours >= 10 && hours < 12) ? "中午好" :
 				(hours >= 12 && hours < 18) ? "下午好" : "晚上好"
+	}
+
+	const { logoutFun } = useRoom()
+
+	const quit = () => {
+		logoutFun()
 	}
 
 	onMounted(() => {
@@ -68,6 +78,15 @@
 
 		.empty {
 			flex: 1 1 auto;
+			z-index: 3;
+			.logout {
+				margin-top: 10px;
+				font-size: 25px;
+				display: flex;
+				justify-content: right;
+				margin-right: 50rpx;
+				color: red;
+			}
 		}
 	}
 </style>

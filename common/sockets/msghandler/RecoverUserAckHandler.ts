@@ -24,6 +24,7 @@ export default class RecoverUserAckHandler {
             userId:msgAck.getUserid(),
             userName:msgAck.getUsername(),
             userAvatar:msgAck.getUseravatar(),
+			ai:msgAck.getRoom()?.getAi()
         }
     }
 }

@@ -69,6 +69,7 @@ export default () => {
 			AQChatMSg.default.MsgCommand.SYNC_CHAT_RECORD_CMD,
 			message
 		);
+		appStore.setForceBottom(+new Date())
 	}
 
 	return {

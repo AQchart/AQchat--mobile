@@ -12,11 +12,15 @@ export default () => {
 
 	interface RoomForm {
 		roomNo : number,
-		roomName : string
+		roomName : string,
+		history : number,
+		ai : number
 	}
 	const roomForm = reactive<RoomForm>({
 		roomNo: 0,
-		roomName: ''
+		roomName: '',
+		history: 1,
+		ai: 0
 	})
 	const reloadLoading = ref(true)
 
@@ -31,7 +35,7 @@ export default () => {
 		if (res) intoRoom(res)
 	}
 
-	const intoRoom = (res) => {
+	const intoRoom = (res : any) => {
 		appStore.setRoomInfo(res)
 		uni.navigateTo({ url: "/pages/im/room" })
 	}
@@ -69,17 +73,74 @@ export default () => {
 				icon: 'error'
 			})
 		}
-
+		let message = new AQChatMSg.default.CreateRoomCmd();
+		message.setRoomno(roomForm.roomNo);
+		message.setRoomname(roomForm.roomName.trim());
+		message.setHistory(roomForm.history);
+		message.setAi(roomForm.ai);
 		AQSender.getInstance().sendMsg(
 			AQChatMSg.default.MsgCommand.CREATE_ROOM_CMD,
-			new AQChatMSg.default.CreateRoomCmd([roomForm.roomNo, roomForm.roomName])
+			message
 		);
+	}
+
+	// 离开房间
+	const leaveRoomFun = () => {
+		uni.showModal({
+			title: '提示',
+			content: '确定离开当前房间？',
+			success: function (res : any) {
+				if (res.confirm) {
+					let model = new AQChatMSg.default.LeaveRoomCmd();
+					model.setRoomid(appStore.roomInfo.roomId);
+					AQSender.getInstance().sendMsg(AQChatMSg.default.MsgCommand.LEAVE_ROOM_CMD, model)
+					setTimeout(() => {
+						appStore.resetRoomInfo();
+						uni.navigateTo({
+							url: '/pages/im/index'
+						});
+					}, 100)
+				}
+			}
+		});
+	}
+
+	const sentences = ['天涯何处觅知音！别忘了回来。', '大爷记得回来玩！', '有空再聊，再见！', '常联系，Bye~', 'see you next time']
+
+	const RandomText = () => {
+		return sentences[Math.trunc(sentences.length * Math.random())]
+	}
+
+	const logoutFun = () => {
+		uni.showModal({
+			title: '提示',
+			content: RandomText(),
+			success: function (res : any) {
+				if (res.confirm) {
+					let userLogout = new AQChatMSg.default.UserLogoutCmd();
+					userLogout.setUserid(appStore.userInfo.userId);
+
+					AQSender.getInstance().sendMsg(
+						AQChatMSg.default.MsgCommand.USER_LOGOUT_CMD, userLogout
+					)
+					setTimeout(() => {
+						appStore.resetAllInfo();
+						AQSender.getInstance().heartbeatStop();
+						uni.navigateTo({
+							url: '/pages/index/index'
+						});
+					}, 100)
+				}
+			}
+		});
 	}
 
 	return {
 		roomForm,
 		reloadLoading,
 		joinRoomFun,
-		createRoomFun
+		createRoomFun,
+		leaveRoomFun,
+		logoutFun
 	}
 }

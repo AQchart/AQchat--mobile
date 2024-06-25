@@ -12,6 +12,22 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-aite:before {
+  content: "\e600";
+}
+
+.icon-down:before {
+  content: "\e608";
+}
+
+.icon-mute:before {
+  content: "\e8b8";
+}
+
+.icon-sound:before {
+  content: "\e8b9";
+}
+
 .icon-meeting:before {
   content: "\e64a";
 }

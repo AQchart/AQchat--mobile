@@ -1,7 +1,10 @@
 <template>
 	<view class="chat">
-		<scroll-view :style="{height: `${windowHeight}px`}" id="scrollview" scroll-y="true" :scroll-top="scrollTop"
-			:scroll-with-animation="true" class="scroll-view">
+		<view style="height: 25px;">
+			<top-bar></top-bar>
+		</view>
+		<scroll-view :style="{height: `${windowHeight-25}px`}" @scroll="scrollEvent" id="scrollview" scroll-y="true"
+			:scroll-top="scrollTop" :scroll-with-animation="true" class="scroll-view">
 			<!-- 聊天主体 -->
 			<view id="msglistview" class="chat-body">
 				<!-- 聊天记录 -->
@@ -12,30 +15,49 @@
 		<!-- 底部消息发送栏 -->
 		<!-- 用来占位，防止聊天消息被发送框遮挡 -->
 		<view class="chat-bottom">
-			<view class="send-msg" :class="(otherShow || emojiShow) ? 'send-msg-other': 'send-msg-only'">
-				<view class="uni-textarea">
-					<imEditor ref="editorRef" class="im-container" placeholder="输入内容..." @input="onEditorInput"
-						@focus="textareaFocus">
+			<view v-if="showScroll" class="scroll-bottom">
+				<u-icon name="arrow-downward" @click="scrollToBottom"></u-icon>
+			</view>
+			<view class="send-msg" :class="(plusShow || emojiShow) ? 'send-msg-other': 'send-msg-only'">
+				<view>
+					<imEditor ref="editorRef" placeholder="输入内容..." @input="onEditorInput" @focus="textareaFocus">
 					</imEditor>
 				</view>
 				<view class="send-btn">
+					<u-icon @click="showAt()" custom-prefix="custom-icon" name=" icon-aite" class="emoji"></u-icon>
 					<u-icon @click="showEmoji()" custom-prefix="custom-icon" name=" icon-emoji" class="emoji"></u-icon>
-					<u-icon @click="showOther()" v-if="!showSend" name="plus" class="plus"></u-icon>
+					<u-icon @click="showPlus()" v-if="!showSend" name="plus" class="plus"></u-icon>
 					<button @click="sendTextMsg" v-if="showSend" class="send">发送</button>
 				</view>
 			</view>
 		</view>
-		<view v-if="otherShow" class="message-other">
+		<view v-if="plusShow" class="message-other">
 			<scroll-view :style="{height: `200rpx`}" class="other-scroll-view" id="other-scroll-view" scroll-y="true"
 				:scroll-with-animation="true">
 				<ul>
 					<li @click="uploadImage">
-						<u-icon name="photo"></u-icon>
-						<span>图片</span>
+						<view class="content-view">
+							<view class="img-box">
+								<img src="/static/assets/images/icon-image.png" alt="图片">
+							</view>
+							<span>图片</span>
+						</view>
 					</li>
 					<li @click="uploadVideo">
-						<u-icon name="camera-fill"></u-icon>
-						<span>视频</span>
+						<view class="content-view">
+							<view class="img-box">
+								<img src="/static/assets/images/icon-video.png" alt="图片">
+							</view>
+							<span>视频</span>
+						</view>
+					</li>
+					<li @click="uploadFile">
+						<view class="content-view">
+							<view class="img-box">
+								<img src="/static/assets/images/icon-file.png" alt="图片">
+							</view>
+							<span>文件</span>
+						</view>
 					</li>
 				</ul>
 			</scroll-view>
@@ -56,7 +78,7 @@
 <script setup lang="ts">
 	import renderMsg from './components/render-msg.vue'
 	import imEditor from './layout/editor.vue'
-	import { ref, onMounted, computed, watch } from 'vue'
+	import { ref, onMounted, computed, watch, nextTick } from 'vue'
 	import { useAppStore } from '@/store/modules/app'
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
@@ -67,6 +89,7 @@
 	import MsgTypeEnum from "@/enums/MsgTypeEnum"
 	import MsgStatusEnum from "@/enums/MsgStatusEnum"
 	import Msg from "@/class/Msg"
+	import topBar from './layout/top-bar.vue'
 
 	const appStore = useAppStore()
 	const customSnowflake = new CustomSnowflake();
@@ -79,28 +102,30 @@
 	const scrollTop = ref(999999)
 	// 新消息条数
 	const newMsgCount = ref(0);
-	const otherShow = ref(false)
+	const plusShow = ref(false)
 	const emojiShow = ref(false)
-	const editorRef = ref(null)
+	const editorRef = ref()
 	const msgStr = ref('')
+	const showScroll = ref(false)
+	const currentScroll = ref(0)
 
 	let msgList : any = appStore.msgList
 
 	onMounted(() => {
 		// 恢复房间进入时消息同步
-		if(appStore.websocketStatus){
+		if (appStore.websocketStatus) {
 			syncChatRecordFun();
 		}
 	})
 
-	const showOther = () => {
-		otherShow.value = !otherShow.value
-		if (otherShow.value) {
+	const showPlus = () => {
+		plusShow.value = !plusShow.value
+		if (plusShow.value) {
 			emojiShow.value = false
 		}
 	}
 	const textareaFocus = () => {
-		otherShow.value = false;
+		plusShow.value = false;
 		emojiShow.value = false;
 	}
 	const selectIcon = (icon : any) => {
@@ -108,7 +133,7 @@
 			src: icon.icon,
 			alt: icon.title,
 		}
-		if (editorRef.value != null) {
+		if (editorRef.value) {
 			editorRef.value.insertImage(imgObject)
 		} else {
 			uni.showToast({
@@ -154,6 +179,7 @@
 			}
 		});
 	}
+
 	// 上传文件到服务器
 	const uploadToOss = (msgInfo : Msg, file : File) => {
 		OssHelper.getInstance().init(msgInfo.msgType, () => {
@@ -163,7 +189,10 @@
 					// 上传到Oss成功后再将文件发送到真实网络中
 					appStore.sendInfoNetWorkFun(msgInfo)
 				}).catch((err) => {
-					ElMessage.error("上传失败,错误为:" + err)
+					uni.showToast({
+						title: "上传失败,错误为:" + err,
+						icon: 'error'
+					})
 				});
 		});
 	}
@@ -192,13 +221,45 @@
 			}
 		});
 	}
+	// 选择文件上传
+	const uploadFile = () => {
+		uni.chooseFile({
+			count: 1,
+			success: function (res : any) {
+				const msgId = customSnowflake.nextId();
+				let msgInfo : Msg = {
+					user: {
+						userId: appStore.userInfo.userId,
+						userAvatar: appStore.userInfo.userAvatar,
+						userName: appStore.userInfo.userName,
+					},
+					roomId: appStore.roomInfo.roomId,
+					msgId: msgId,
+					msgType: MsgTypeEnum.FILE,
+					msg: res.tempFilePaths[0],
+					msgStatus: MsgStatusEnum.PENDING,
+					ext: res.tempFiles[0].name
+				}
+				appStore.sendInfoLocalFun(msgInfo)
+				uploadToOss(msgInfo, res.tempFiles[0])
+			}
+		})
+	}
+
+
 	// 表情包
 	const showEmoji = () => {
 		emojiShow.value = !emojiShow.value
 		if (emojiShow.value) {
-			otherShow.value = false
+			plusShow.value = false
 		}
 	}
+
+	// 显示艾特框
+	const showAt = () => {
+		editorRef.value && editorRef.value.showAt()
+	}
+
 	// 重新编辑
 	const rewriteFun = (ext : any) => {
 		editorRef.value && editorRef.value.rewriteFun(ext)
@@ -210,7 +271,10 @@
 
 	// 监听msgId变化，判断是否需要触底
 	watch(() => appStore.msgId, (newV) => {
-		console.log("消息更新");
+		scrollToBottom()
+	})
+
+	watch(() => appStore.aiCode, (newVal) => {
 		scrollToBottom()
 	})
 
@@ -231,7 +295,7 @@
 
 	const windowHeight = computed(() => {
 		let px = uni.getSystemInfoSync().windowHeight;
-		if (emojiShow.value || otherShow.value) {
+		if (emojiShow.value || plusShow.value) {
 			px = px - 162
 		}
 		else {
@@ -240,19 +304,38 @@
 		return px
 	})
 
+	const scrollEvent = (e : any) => {
+		currentScroll.value = e.detail.scrollHeight
+		showScroll.value = e.detail.scrollHeight - e.detail.scrollTop >= 1000
+	}
+
 	// 滚动至聊天底部
 	const scrollToBottom = () => {
-		setTimeout(() => {
-			let query = uni.createSelectorQuery().in(this);
-			query.select('#scrollview').boundingClientRect();
-			query.select('#msglistview').boundingClientRect();
-			query.exec((res) => {
-				const height1 = res[1].height
-				const height0 = res[0].height
-				scrollTop.value = height1 > height0 ? height1 : height0;
+		if (currentScroll.value == 0) {
+			scrollTop.value = currentScroll.value - 100
+			nextTick(() => {
+				let query = uni.createSelectorQuery().in(this);
+				query.select('#scrollview').boundingClientRect();
+				query.select('#msglistview').boundingClientRect();
+				query.exec((res) => {
+					const height1 = res[1].height
+					const height0 = res[0].height
+					scrollTop.value = height1 > height0 ? height1 : height0;
+				})
 			})
-		}, 50)
+		} else {
+			scrollTop.value = currentScroll.value - 100
+			nextTick(() => {
+				scrollTop.value = currentScroll.value
+			})
+		}
 	}
+
+	// 监听强制触底标识
+	watch(() => appStore.forceBottom, (newV) => {
+		newMsgCount.value = 0;
+		scrollToBottom()
+	})
 
 	// 恢复用户信息
 	function RecoverUser() {
@@ -289,11 +372,12 @@
 			})
 			return
 		}
-		sendMessage(0, msgStr.value)
+		sendMessage(0, msgStr.value, editorRef.value.getAtList())
 	}
 
+
 	// 组装和发送消息
-	const sendMessage = (type : number, msg : string) => {
+	const sendMessage = (type : number, msg : string, ext : string) => {
 		// const data = {
 		// 	roomId: appStore.roomInfo.roomId,
 		// 	msgType: type,
@@ -301,7 +385,7 @@
 		// 	msgId: snowFake.nextId()
 		// }
 		// sendMessageFun(data)
-		appStore.sendInfo(msg, MsgTypeEnum.TEXT)
+		appStore.sendInfo(msg, MsgTypeEnum.TEXT, ext)
 		msgStr.value = ''
 		editorRef.value.clear()
 	}
@@ -352,6 +436,32 @@
 			width: 100%;
 			background: var(--input-out-bg);
 
+			.scroll-bottom {
+				position: absolute;
+				z-index: 1400;
+				width: 45px;
+				height: 30px;
+				right: -1px;
+				bottom: 100px;
+				// border-radius: 20px;
+				background-color: #cfcfcf;
+				border-top-left-radius: 50px;
+				border-bottom-left-radius: 50px;
+
+				.u-icon {
+					margin-top: 5px;
+					margin-left: 5px;
+					width: 20px;
+					height: 20px;
+					color: #fff;
+					font-size: 17px;
+					border-radius: 50px;
+					line-height: 20px;
+					text-align: center;
+					background-color: red;
+				}
+			}
+
 			.send-msg-only {
 				bottom: 0;
 			}
@@ -369,23 +479,6 @@
 				background: #fff;
 			}
 
-			.uni-textarea {
-				.im-container {
-					width: 500rpx;
-					height: auto;
-					min-height: 75rpx;
-					max-height: 500rpx;
-					background: var(--input-inner-bg);
-					border-radius: 8rpx;
-					font-size: 32rpx;
-					font-family: PingFang SC;
-					color: var(--input-text-color);
-					line-height: 43rpx;
-					padding: 5rpx 8rpx;
-					box-shadow: rgba(50, 50, 93, 0.1) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.1) 0px 18px 36px -18px inset;
-				}
-			}
-
 			.send-btn {
 				display: flex;
 				flex: 0 0 auto;
@@ -396,8 +489,8 @@
 					display: flex;
 					align-items: center;
 					justify-content: center;
-					width: 108rpx;
-					height: 65rpx;
+					width: 89rpx;
+					height: 45rpx;
 					margin-left: 5px;
 					background: var(--send-btn-bg);
 					border-radius: 8rpx;
@@ -480,12 +573,12 @@
 
 			.other-scroll-view {
 				ul {
-					padding: 8px;
+					padding: 20rpx;
 					display: flex;
 					flex-wrap: wrap;
 
 					li {
-						margin: 8px;
+						margin: 20rpx;
 						display: flex;
 						align-items: center;
 						justify-content: center;
@@ -496,19 +589,25 @@
 						background-color: #fff;
 						color: #000;
 						border-radius: 20rpx;
-						padding: 9rpx;
+						padding: 8rpx;
 
-						.u-icon {
-							flex: 1;
-							font-size: 90rpx;
-							flex-basis: 90rpx;
-							justify-content: center;
-						}
-
-						span {
-							flex: 1;
-							flex-basis: 90rpx;
+						.content-view {
+							width: 130rpx;
+							height: 130rpx;
 							text-align: center;
+
+							.img-box {
+								img {
+									width: 80rpx;
+									height: 80rpx;
+								}
+
+								text-align: center;
+							}
+
+							span {
+								text-align: center;
+							}
 						}
 					}
 
