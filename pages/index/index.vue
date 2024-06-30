@@ -3,6 +3,13 @@
 		<view class="theme-btn">
 			<theme></theme>
 		</view>
+		<view class="star-tips">
+			您的
+			<span style="color: #fcbd71;">Star</span>
+			是我们更新的动力，期待你的
+			<u-icon name="star"></u-icon>
+			<span class="go-star" @click="goStar">去Star</span>
+		</view>
 		<view class="svg-lottie">
 			<lottie :src="LottieChat"></lottie>
 		</view>
@@ -11,13 +18,25 @@
 		</view>
 		<view class="chat-text-printer">{{ descText }}</view>
 		<view class="hot-point-list">
-			<u-row class="hot-point-item" v-for="(row,index) in advantageList" :style="getTextAligh(index)"
-				:key="index">
-				<view class="title">{{ row.title }}</view>
-				<view class="desc">{{ row.desc }}</view>
-			</u-row>
+			<swiper :autoplay="true" :interval="2000">
+				<swiper-item class="hot-point-item" v-for="(row,index) in advantageList" :key="index">
+					<view class="title">{{ row.title }}</view>
+					<view class="desc">{{ row.desc }}</view>
+				</swiper-item>
+				<swiper-item class="hot-point-item">
+					<view class="title" @click="giteeHub">🚝仓库</view>
+					<view class="desc">
+						<span class="git-name" @click="giteeHub">AQChat</span>
+						<a href="https://gitee.com/howcode/aq-chat/stargazers">
+							<img src="https://gitee.com/howcode/aq-chat/badge/star.svg?theme=dark" alt="star">
+						</a>
+						<a href="https://gitee.com/howcode/aq-chat/members">
+							<img src="https://gitee.com/howcode/aq-chat/badge/fork.svg?theme=dark" alt="fork">
+						</a>
+					</view>
+				</swiper-item>
+			</swiper>
 		</view>
-
 		<view class="start-btn" @click="toStartPage">
 			<u-icon name="rewind-right"></u-icon> 开启
 		</view>
@@ -39,13 +58,15 @@
 	setTimeout(() => {
 		startTyping(text.value, descText)
 	}, 1000)
-
-	const getTextAligh = (index : Number) => {
-		return {
-			textAlign: index == 0 ? 'left' : index == 1 ? 'center' : 'right'
-		}
+	
+	const goStar = () => {
+		window.open('https://gitee.com/howcode/aq-chat')
 	}
 	
+	const giteeHub = () => {
+		window.open('https://gitee.com/howcode/aq-chat')
+	}
+
 	const toStartPage = () => {
 		uni.navigateTo({
 			url: "/pages/start/index"
@@ -75,6 +96,24 @@
 		align-items: left;
 		justify-content: center;
 		color: var(--txt-color);
+
+		.star-tips {
+			position: absolute;
+			top: 100rpx;
+			width: 96%;
+			height: 41rpx;
+			left: 2%;
+			background-color: #fdf6ec;
+			border: 1px solid #fcbd71;
+			border-radius: 4px;
+			color: #f90;
+			text-align: center;
+
+			.go-star {
+				cursor: pointer;
+				color: #2979ff;
+			}
+		}
 
 		.theme-btn {
 			padding: 10px 0px 5px 10px;
@@ -111,11 +150,16 @@
 				.title {
 					width: 100%;
 					font-size: 25px;
+					text-align: left;
 				}
 
 				.desc {
 					width: 100%;
 					margin-top: 5px;
+					font-size: 15px;
+					.git-name {
+						margin-right: 4px;
+					}
 				}
 			}
 		}
@@ -124,7 +168,8 @@
 			margin-top: 20px;
 			font-size: 24px;
 			font-family: "YYZY";
-			background-color: var(--im-primary);;
+			background-color: var(--im-primary);
+			;
 			color: #fff;
 			text-align: center;
 			cursor: pointer;
@@ -138,6 +183,7 @@
 			align-items: center;
 			justify-content: center;
 			text-align: center;
+
 			&:hover {
 				transform: translateY(3px);
 				box-shadow: none;
