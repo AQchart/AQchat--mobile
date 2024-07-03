@@ -176,7 +176,7 @@ export const useAppStore = defineStore('app', {
 			}
 			this.sendInfoLocalFun(msgInfo)
 			this.sendInfoNetWorkFun(msgInfo)
-			if (this.roomInfo.ai === AiTypeEnum.AIZOOM) {
+			if (this.roomInfo.ai == AiTypeEnum.AIZOOM) {
 				let aiAssistant = null
 				if (callUserList.length == 1) {
 					aiAssistant = callUserList[0]

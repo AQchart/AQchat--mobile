@@ -23,9 +23,12 @@
 <script setup lang="ts">
 	import { ref, defineExpose, nextTick } from 'vue';
 	import useRoom from '../hook/useRoom'
+	import { useAppStore } from '@/store/modules/app'
+	const appStore = useAppStore()
 	const created = ref(false);
 	const showPopup = ref(false);
 	const formDataRef = ref();
+
 
 	const {
 		roomForm,
@@ -33,7 +36,7 @@
 		joinRoomFun,
 		createRoomFun
 	} = useRoom()
-	
+
 	// 校验规则
 	const rules = {
 		roomName: [{ required: true, message: '请输入房间名', trigger: ['change', 'blur'] },
@@ -48,7 +51,7 @@
 		},
 		{ min: 4, max: 10, message: '房间号长度为4-10数字', trigger: ['change', 'blur'] }]
 	}
-	
+
 	// 显示输入框
 	const show = (create : boolean) => {
 		created.value = create
@@ -63,7 +66,7 @@
 			}
 		})
 	};
-	
+
 	// 隐藏输入框
 	const hide = () => {
 		showPopup.value = false
@@ -74,9 +77,11 @@
 		formDataRef.value.validate((valid : any) => {
 			if (valid && created.value) {
 				createRoomFun()
+				appStore.setRoomType(0)
 				hide()
 			} else if (valid && !created.value) {
 				joinRoomFun()
+				appStore.setRoomType(0)
 				hide()
 			}
 		})

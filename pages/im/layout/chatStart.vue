@@ -44,7 +44,6 @@
 	const roomDialogRef = ref(null)
 	const appStore = useAppStore()
 	const joinRoom = () => {
-		appStore.setRoomType(0)
 		if (appStore.roomInfo.roomId) {
 			uni.showModal({
 				title: '系统提示',
@@ -91,7 +90,6 @@
 			})
 			return
 		}
-		appStore.setRoomType(1)
 		uni.showModal({
 			title: '准备起飞',
 			content: `AI Space是与 Gitee AI 联合推出的新型房间，意为用户提供智能问答、图像生成、语音处理等多种服务，是否开启AI空间体验？`,
@@ -99,6 +97,7 @@
 			cancelText: '我再想想',
 			success: (res) => {
 				if (res.confirm) {
+					appStore.setRoomType(1)
 					let msg = new AQChatMSg.default.OpenAiRoomCmd();
 					msg.setUserid(appStore.userInfo.userId);
 					AQSender.getInstance().sendMsg(

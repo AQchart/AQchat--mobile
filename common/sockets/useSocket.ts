@@ -351,7 +351,9 @@ export default () => {
 			const msg : Msg = result[i]
 			appStore.setMsgRecord(msg)
 		}
-		initAiFun()
+		if (appStore.roomType == 0) {
+			initAiFun()
+		}
 	}
 	// 用户退出登录
 	const userLogoutFun = (result : any) => {

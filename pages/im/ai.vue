@@ -8,7 +8,7 @@
 			<!-- 聊天主体 -->
 			<view id="msglistview" class="chat-body">
 				<div class="ai-tip">
-					<lottie-ani class="icon-ai" :src="lottieAi" />
+					<lottie class="icon-ai" :src="lottieAi" />
 					<div class="txt">欢迎进入AI空间（AI Space），您可以直接发起连续提问，小T会回答您任何问题。</div>
 					<div class="txt">如有其它需求，可以选择@其他AI助手。</div>
 					<div class="ai-list">
@@ -51,12 +51,14 @@
 	import { useAppStore } from '@/store/modules/app'
 	import useChart from './hook/useChat'
 	import emoList from './hook/emo'
+	import lottie from "../components/lottie.vue";
 	import { OssHelper } from '@/common/sockets/utils/OssHelper'
 	import CustomSnowflake from "@/utils/CustomSnowflake"
 	import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb';
 	import AQSender from '@/common/sockets/AQSender'
 	import MsgTypeEnum from "@/enums/MsgTypeEnum"
 	import MsgStatusEnum from "@/enums/MsgStatusEnum"
+	import lottieAi from '/static/assets/json/lottie-ai.json';
 	import Msg from "@/class/Msg"
 	import topBar from './layout/top-bar.vue'
 	import { AssistantsList, AiWaitMsgInfo } from "@/common/config"

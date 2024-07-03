@@ -45,6 +45,7 @@
 	import voice from './voice.vue'
 	import video from './video.vue'
 	import file from './file.vue'
+	import wait from './wait.vue'
 	import MsgTypeEnum from "@/enums/MsgTypeEnum"
 	import MsgStatusEnum from "@/enums/MsgStatusEnum"
 	import { ref, nextTick, defineEmits } from 'vue'
@@ -180,6 +181,8 @@
 				return video
 			case MsgTypeEnum.FILE:
 				return file
+			case MsgTypeEnum.WAIT:
+				return wait
 			default: break;
 		}
 	}
@@ -203,6 +206,8 @@
 				return { src: message.msg }
 			case MsgTypeEnum.FILE:
 				return { src: message.msg, ext: message.ext }
+			case MsgTypeEnum.WAIT:
+				return { text: message.msg }
 			default:
 				return {}
 		}
