@@ -32,14 +32,12 @@ WEB端代码：<a href="https://gitee.com/howcode/aq-chat">AQChat</a><br/>
 软件架构说明
 
 ### 项目截图
-<img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/1715433579465.png" width="500">
+<img src="https://typora-record.oss-cn-shenzhen.aliyuncs.com/img/20240613_203832.gif">
+<img src="https://typora-record.oss-cn-shenzhen.aliyuncs.com/img/image-20240703155628479.png">
+<img src="https://typora-record.oss-cn-shenzhen.aliyuncs.com/img/image-20240703155711371.png">
 <img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/1715433594150.png" width="500">
-<img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/1715433609771.png" width="500">
-<img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/1715433659944.png" width="500">
 <img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/1715433812218.png">
-<img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/20240511212736.jpg" height="500">
 <img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/20240511212748.jpg" height="500">
-<img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/20240511212754.jpg" height="500">
 <img src="https://aqchat.oss-cn-shenzhen.aliyuncs.com/demo/20240511212801.jpg" height="500">
 
 
