@@ -14,9 +14,7 @@
 			</text>
 		</view>
 		<view v-else class="message-item">
-			<img class="avatar" :src="message.user.userAvatar" alt="[头像]"
-				v-if="currentUser.userId != message.user.userId && message.user.userId== 'AQChatHelper'"/>
-			<view class="avatar" v-else-if="currentUser.userId != message.user.userId" v-html="message.user.userAvatar"></view>
+			<img class="avatar" v-if="message.user.userId != appStore.userInfo.userId" :src="svgToDataURL(message.user.userAvatar)" alt="[头像]"/>
 			<view class="message">
 				<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">
 					{{ message.user.userName }}
@@ -28,10 +26,7 @@
 					</component>
 				</view>
 			</view>
-			<img class="avatar" :src="message.user.userAvatar" alt="[头像]"
-				v-if="currentUser.userId == message.user.userId && message.user.userId== 'AQChatHelper'"/>
-			<view class="avatar" v-else-if="currentUser.userId == message.user.userId"
-				v-html="message.user.userAvatar"></view>
+			<img class="avatar" v-if="message.user.userId == appStore.userInfo.userId" :src="svgToDataURL(message.user.userAvatar)" alt="[头像]"/>
 			<loading v-if="message.msgStatus === MsgStatusEnum.PENDING" class="mine-load" />
 		</view>
 		<view class="shade" v-show="showShade" @tap="hidePop">
@@ -91,6 +86,19 @@
 		};
 		// #endif
 	})
+	
+	
+	
+	const svgToDataURL = (html : any) => {
+		if(html.indexOf('png') != -1) {
+			return html
+		}
+		const toolElm = document.createElement('div')
+		toolElm.innerHTML = html
+		const svgElement = toolElm.firstChild
+		if (!svgElement) return null
+		return 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svgElement))
+	}
 
 	/* 列表触摸事件 */
 	const listTap = () => {

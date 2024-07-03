@@ -10,7 +10,9 @@ enum MsgTypeEnum {
   // 文件
   FILE = 4,
   // 提示
-  TIP = 99
+  TIP = 99,
+  // 等待
+  WAIT = 100,
 }
 
 export default MsgTypeEnum

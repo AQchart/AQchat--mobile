@@ -1,10 +1,9 @@
 <template>
 	<checkbox-group v-if="showAtUser" class="img-check-group" @change="handleSelect">
-		<checkbox class="img-checkbox" v-for="member in appStore.memberList" :value="member.userId"
+		<checkbox class="img-checkbox" v-for="member in userList" :value="member.userId"
 			:name="member.userName" :key="member.userId">
 			<view class="img-box" :class="atActive(member.userId) ? 'img-cheched': ''">
-				<img class="avatar" v-if="member.userId == 'AQChatHelper'" :src="member.userAvatar" alt="">
-				<div class="avatar" v-else v-html="member.userAvatar"></div>
+				<img class="avatar" :src="member.userAvatar" alt="">
 			</view>
 			<span class="name">{{ member.userName }}</span>
 		</checkbox>
@@ -12,7 +11,8 @@
 	<view class="im-container">
 		<view class="editor">
 			<editor id="im-editor" ref="inputRef" class="im-editor im-blank" :placeholder="placeholder"
-				@statuschange="onInput" @input="onInput" @focus="onFocus" :read-only="false" @ready="initEditor">
+				@statuschange="onInput" @input="onInput" @focus="onFocus" :read-only="appStore.editorDisabled"
+				@ready="initEditor">
 			</editor>
 		</view>
 	</view>
@@ -42,11 +42,13 @@
 	 * 输入框el
 	 */
 	const inputRef = ref()
-	
+
 	/**
 	 * html内容
 	 */
 	const htmlContent = ref('')
+
+	const userList = ref([])
 
 	/**
 	 * emit事件
@@ -61,6 +63,24 @@
 
 	const deltaList = ref([])
 
+	const initUserList = () => {
+		userList.value = appStore.memberList.filter((x: any)=>x.userId != appStore.userInfo.userId).map(x => {
+			return {
+				userId: x.userId,
+				userName: x.userName,
+				userAvatar: x.userAvatar.indexOf('png') != -1 ? x.userAvatar : svgToDataURL(x.userAvatar)
+			}
+		})
+	}
+
+	const svgToDataURL = (html : any) => {
+		const toolElm = document.createElement('div')
+		toolElm.innerHTML = html
+		const svgElement = toolElm.firstChild
+		if (!svgElement) return null
+		return 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svgElement))
+	}
+
 	const initEditor = () => {
 		// #ifdef APP-PLUS || MP-WEIXIN || H5
 		uni.createSelectorQuery().select('#im-editor').context((res : any) => {
@@ -71,9 +91,18 @@
 		}).exec()
 		// #endif
 	}
+	
+	// 更新消息列表
+	watch(() => appStore.memberList, (newV:any) => {
+	  let memberList = newV.filter((x: any)=>x.userId != appStore.userInfo.userId);
+	  if(memberList.length > 0){
+	    initUserList();
+	  }
+	}, { immediate:true,deep: true })
 
 	onMounted(() => {
 		initEditor()
+		console.log(appStore.memberList)
 	})
 
 	/**
@@ -83,15 +112,18 @@
 		if (editorCtx.value) {
 			getContents()
 			asyncAtList()
-			emit('input', htmlContent.value == '<p><br></p>' ? '': htmlContent.value)
+			emit('input', htmlContent.value == '<p><br></p>' ? '' : htmlContent.value)
 		}
 	}
 
 	// 获取艾特列表
 	const getAtList = () => {
-		return atList.value.map((it: string) => '@' + it).join(',')
+		return atList.value.map((it : string) => '@' + it).join(',')
 	}
 
+	const getCallUserList = () => {
+		return appStore.memberList.filter(it => atList.value.includes(it.userId))
+	}
 	// 艾特勾选 
 	const atActive = (userId : string) => {
 		return atList.value.indexOf(userId) > -1
@@ -121,9 +153,9 @@
 		atList.value.forEach((ele : any) => {
 			let arr : any[] = []
 			const user = appStore.memberList.find(it => it.userId == ele)
-			let atUsers = deltaList.value.filter((it:any) => it.attributes && it.attributes.link).map((it: any) => it.attributes.link.replace('#',''))
+			let atUsers = deltaList.value.filter((it : any) => it.attributes && it.attributes.link).map((it : any) => it.attributes.link.replace('#', ''))
 			// 艾特过的不处理
-			if(atUsers.includes(user?.userId)) {
+			if (atUsers.includes(user?.userId)) {
 				return;
 			}
 			editorCtx.value.insertText({
@@ -184,10 +216,10 @@
 			}
 		})
 	}
-	
+
 	// 同步艾特
 	const asyncAtList = () => {
-		atList.value = deltaList.value.filter((it:any) => it.attributes && it.attributes.link).map((it: any) => it.attributes.link.replace('#',''))
+		atList.value = deltaList.value.filter((it : any) => it.attributes && it.attributes.link).map((it : any) => it.attributes.link.replace('#', ''))
 	}
 
 	const setContents = () => {
@@ -243,13 +275,14 @@
 		clear,
 		rewriteFun,
 		getAtList,
-		showAt
+		showAt,
+		getCallUserList
 	})
 </script>
 
 <style lang="scss" scoped>
 	.im-container {
-		width: 460rpx;
+		width: 450rpx;
 		height: auto;
 		min-height: 75rpx;
 		max-height: 500rpx;

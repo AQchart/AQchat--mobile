@@ -5,7 +5,7 @@
 				<view @click="leaveRoom"><u-icon name="arrow-left"></u-icon>离开</view>
 			</u-col>
 			<u-col span="6" @click="show = true" style="text-align: center; white-space: nowrap; overflow:hidden;text-overflow:ellipsis;">
-				{{ appStore.roomInfo.roomName }}({{ appStore.roomInfo.roomNo }})
+				{{ appStore.roomInfo.roomName }}{{ appStore.roomInfo.roomNo == 0 ? '' : `(${appStore.roomInfo.roomNo})` }}
 				<u-icon color="#409eff"
 					name="account-fill"></u-icon>({{ appStore.memberList.length }})
 			</u-col>

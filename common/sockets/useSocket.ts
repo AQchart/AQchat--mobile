@@ -6,6 +6,8 @@ import ExceptionEnum from "@/enums/ExceptionEnum"
 import Msg from "@/class/Msg"
 import MsgTypeEnum from "@/enums/MsgTypeEnum"
 import MsgStatusEnum from "@/enums/MsgStatusEnum"
+import AiTypeEnum from "@/enums/AiTypeEnum"
+import { AiWaitMsgInfo } from "@/common/config"
 import CallbackMethodManager from '@/common/sockets/CallbackMethodManager';
 import { ref, watch } from 'vue'
 
@@ -63,7 +65,7 @@ export default () => {
 							url: "/pages/im/room"
 						})
 						appStore.setRoomInfo(result);
-						if(result.ai === 1) {
+						if (result.ai === 1) {
 							initAiFun()
 						}
 						break;
@@ -73,7 +75,7 @@ export default () => {
 							url: "/pages/im/room"
 						})
 						appStore.setRoomInfo(result);
-						if(result.ai === 1) {
+						if (result.ai === 1) {
 							initAiFun()
 						}
 						break;
@@ -131,6 +133,14 @@ export default () => {
 					// 流消息
 					case AQChatMSg.default.MsgCommand.STREAM_MSG_NOTIFY:
 						streamMsgNotifyFun(result)
+						break;
+					// 开启AI空间回调
+					case AQChatMSg.default.MsgCommand.OPEN_AI_ROOM_ACK:
+						openAiRoomFun(result)
+						break;
+					// AI消息回调
+					case AQChatMSg.default.MsgCommand.AI_REPLY_MSG_ACK:
+						aiReplyMsg(result)
 						break;
 					// 异常消息回调
 					case AQChatMSg.default.MsgCommand.EXCEPTION_MSG:
@@ -196,24 +206,48 @@ export default () => {
 
 	// ai流消息
 	const streamMsgNotifyFun = (result : any) => {
-		let currentMsg = appStore.msgList.find(x => x.msgId === result.msgId);
-		if (currentMsg) {
-			currentMsg.msg += result.msg
-			appStore.setAiCode(+new Date() + '')
-		} else {
-			const msg : Msg = {
-				user: {
-					userId: result.userId,
-					userAvatar: result.userAvatar,
-					userName: result.userName,
-				},
-				roomId: result.roomId,
-				msgType: MsgTypeEnum.TEXT,
-				msg: result.msg,
-				msgId: result.msgId
+		if (appStore.roomInfo.ai == AiTypeEnum.AIZOOM) {
+			let currentMsg = appStore.msgList.find(x => x.msgId === AiWaitMsgInfo.msgId);
+			if (currentMsg) {
+				if (currentMsg.msg === AiWaitMsgInfo.msg) {
+					currentMsg.msgType = MsgTypeEnum.TEXT;
+					currentMsg.msg = result.msg
+					currentMsg.msgId = result.msgId
+				} else {
+					currentMsg.msg += result.msg
+					appStore.setAiCode(+new Date() + '')
+				}
+			} else {
+				currentMsg = appStore.msgList.find(x => x.msgId === result.msgId);
+				if (!currentMsg) return
+				currentMsg.msg += result.msg
+				appStore.setAiCode(+new Date() + '')
 			}
-			appStore.sendInfoLocalFun(msg)
-			appStore.setMsgId(result.msgId)
+			if (result.streamType == 0) {
+				appStore.setEditorDisabled(true)
+			} else {
+				appStore.setEditorDisabled(false)
+			}
+		} else {
+			let currentMsg = appStore.msgList.find(x => x.msgId === result.msgId);
+			if (currentMsg) {
+				currentMsg.msg += result.msg
+				appStore.setAiCode(+new Date() + '')
+			} else {
+				const msg : Msg = {
+					user: {
+						userId: result.userId,
+						userAvatar: result.userAvatar,
+						userName: result.userName,
+					},
+					roomId: result.roomId,
+					msgType: MsgTypeEnum.TEXT,
+					msg: result.msg,
+					msgId: result.msgId
+				}
+				appStore.sendInfoLocalFun(msg)
+				appStore.setMsgId(result.msgId)
+			}
 		}
 	}
 
@@ -396,7 +430,7 @@ export default () => {
 			roomId: result.roomId || '',
 			roomNo: result.roomNo || '',
 			roomName: result.roomName || '',
-			ai:result.ai || 0,
+			ai: result.ai || 0,
 		})
 	}
 	// 用户登录
@@ -404,6 +438,30 @@ export default () => {
 		appStore.setUserInfo(result)
 		uni.navigateTo({ url: "/pages/im/index" })
 	}
+	// 开启AI空间回调
+	const openAiRoomFun = (result : any) => {
+		const roomInfo = {
+			roomId: result.roomId,
+			roomName: 'AI空间',
+			roomNo: '1024',
+			ai: AiTypeEnum.AIZOOM
+		}
+		appStore.setRoomInfo(roomInfo);
+		appStore.memberList = result.assistantsList
+	}
+
+	// AI图片、音频消息回调
+	const aiReplyMsg = (result : any) => {
+		let currentMsg = appStore.msgList.find(x => x.msgId === AiWaitMsgInfo.msgId);
+		if (currentMsg) {
+			currentMsg.msgType = result.msgType;
+			currentMsg.msg = result.msg
+			currentMsg.msgId = result.msgId
+			appStore.setAiCode(+new Date() + '')
+			appStore.setEditorDisabled(false)
+		}
+	}
+
 	// 消息异常
 	const exceptionFun = (result : any) => {
 		console.log("消息异常", result);

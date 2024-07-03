@@ -24,6 +24,8 @@ import RecallMsgAckHandler from './RecallMsgAckHandler';
 import RecallMsgNotifyHandler from './RecallMsgNotifyHandler';
 import ExceptionMsgHandler from './ExceptionMsgHandler';
 import StreamMsgNotifyHandler from './StreamMsgNotifyHandler';
+import OpenAiRoomAckHandler from './OpenAiRoomAckHandler'
+import AiReplyMsgAckHandler from './AiReplyMsgAckHandler'
 
 export default class AQMsgHandlerFactory {
     private static instance: AQMsgHandlerFactory = new AQMsgHandlerFactory()
@@ -54,6 +56,8 @@ export default class AQMsgHandlerFactory {
         this.handlerMap[msgCommand.RECALL_MSG_ACK] = new RecallMsgAckHandler();
         this.handlerMap[msgCommand.RECALL_MSG_NOTIFY] = new RecallMsgNotifyHandler();
 		this.handlerMap[msgCommand.STREAM_MSG_NOTIFY] = new StreamMsgNotifyHandler();
+		this.handlerMap[msgCommand.OPEN_AI_ROOM_ACK] = new OpenAiRoomAckHandler();
+		this.handlerMap[msgCommand.AI_REPLY_MSG_ACK] = new AiReplyMsgAckHandler();
         this.handlerMap[msgCommand.HEART_BEAT_ACK] = "心跳保活";
     }
 

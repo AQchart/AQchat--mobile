@@ -5,15 +5,21 @@ import AQSender from '@/common/sockets/AQSender'
 import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb'
 import MsgStatusEnum from "@/enums/MsgStatusEnum"
 import MsgTypeEnum from "@/enums/MsgTypeEnum"
+import AiTypeEnum from "@/enums/AiTypeEnum"
+import { AssistantsList,AiWaitMsgInfo } from "@/common/config"
 import CustomSnowflake from "@/utils/CustomSnowflake"
 
 interface RoomInfo {
 	roomId : string,
 	roomNo : string,
 	roomName : string,
-	ai: number| string
+	ai : number | string
 }
 
+enum RoomType {
+	CHAT = 0,
+	AI = 1
+}
 
 interface AppState {
 	websocketStatus : boolean,
@@ -37,13 +43,15 @@ interface AppState {
 	aiCode : number | string,
 	// 强制触底标识
 	forceBottom : number | string,
+	roomType : RoomType | number,
+	editorDisabled : boolean
 }
 
 const customSnowflake = new CustomSnowflake(1);
 
 export const useAppStore = defineStore('app', {
 	unistorage: {
-		paths: ['theme', 'userInfo', 'roomInfo']
+		paths: ['theme', 'userInfo', 'roomInfo', 'roomType']
 	}, // 是否持久化
 	state: () : AppState => ({
 		websocketStatus: false,
@@ -69,7 +77,9 @@ export const useAppStore = defineStore('app', {
 		soundDom: null,
 		msgId: '',
 		aiCode: '',
-		forceBottom: ''
+		forceBottom: '',
+		roomType: RoomType.CHAT,
+		editorDisabled: false
 	}),
 	getters: {
 		theme: (state) => state.themeDark,
@@ -77,6 +87,9 @@ export const useAppStore = defineStore('app', {
 	actions: {
 		setMsgId(msgId : number | string) {
 			this.msgId = msgId;
+		},
+		setEditorDisabled(status : boolean) {
+			this.editorDisabled = status
 		},
 		setAiCode(code : number | string) {
 			this.aiCode = code;
@@ -90,11 +103,15 @@ export const useAppStore = defineStore('app', {
 		setUserInfo(userInfo : User) {
 			this.userInfo = userInfo
 		},
+		setRoomType(type : number) {
+			this.roomType = type
+		},
 		resetRoomInfo() {
 			this.roomInfo = {
 				roomId: '',
 				roomNo: '',
-				roomName: ''
+				roomName: '',
+				ai: 0
 			}
 			this.msgList = []
 		},
@@ -132,7 +149,8 @@ export const useAppStore = defineStore('app', {
 			this.roomInfo = {
 				roomId: '',
 				roomNo: '',
-				roomName: ''
+				roomName: '',
+				ai: 0
 			}
 			this.userInfo = {
 				userId: '',
@@ -141,7 +159,7 @@ export const useAppStore = defineStore('app', {
 			}
 			this.msgList = []
 		},
-		sendInfo(msg : string, msgType : MsgTypeEnum, ext : string = '') {
+		sendInfo(msg : string, msgType : MsgTypeEnum, ext : string = '', callUserList:User[]) {
 			const msgId = customSnowflake.nextId();
 			const msgInfo : Msg = {
 				user: {
@@ -157,8 +175,29 @@ export const useAppStore = defineStore('app', {
 				ext: ext
 			}
 			this.sendInfoLocalFun(msgInfo)
-
 			this.sendInfoNetWorkFun(msgInfo)
+			if (this.roomInfo.ai === AiTypeEnum.AIZOOM) {
+				let aiAssistant = null
+				if (callUserList.length == 1) {
+					aiAssistant = callUserList[0]
+				} else {
+					aiAssistant = AssistantsList[1]
+				}
+				const msgId = AiWaitMsgInfo.msgId;
+				const tempMsg : Msg = {
+					msgId: msgId,
+					msg: AiWaitMsgInfo.msg,
+					msgType: MsgTypeEnum.WAIT,
+					roomId: this.roomInfo.roomId,
+					user: {
+						userId: AiWaitMsgInfo.userId,
+						userAvatar: aiAssistant.userAvatar,
+						userName: aiAssistant.userName,
+					}
+				}
+				this.editorDisabled = true;
+				this.sendInfoLocalFun(tempMsg)
+			}
 		},
 		sendInfoLocalFun(msg : Msg) {
 			this.msgList.push(msg)
