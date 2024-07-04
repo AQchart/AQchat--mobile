@@ -19,9 +19,9 @@
 		<view class="chat-text-printer">{{ descText }}</view>
 		<view class="hot-point-list">
 			<swiper :autoplay="true" :interval="2000">
-				<swiper-item class="hot-point-item" v-for="(row,index) in advantageList" :key="index">
+				<swiper-item class="hot-point-item" v-for="(row,index) in advantageList" @click="toUrl(row)"  :key="index">
 					<view class="title">{{ row.title }}</view>
-					<view class="desc">{{ row.desc }}</view>
+					<view class="desc" v-html="row.desc"></view>
 				</swiper-item>
 				<swiper-item class="hot-point-item">
 					<view class="title" @click="giteeHub">🚝仓库</view>
@@ -59,10 +59,15 @@
 		startTyping(text.value, descText)
 	}, 1000)
 	
+	const toUrl = (row:any)=>{
+	  if(!row.url) return
+	  window.open(row.url,row.title)
+	}
+
 	const goStar = () => {
 		window.open('https://gitee.com/howcode/aq-chat')
 	}
-	
+
 	const giteeHub = () => {
 		window.open('https://gitee.com/howcode/aq-chat')
 	}
@@ -86,6 +91,11 @@
 		{
 			title: '✨简单',
 			desc: '0引导，所见即所得'
+		},
+		{
+			title: "🚝官网文档",
+			desc: "AQChat文档中心</br>详细的部署教程、设计思路等",
+			url: 'https://docs.aqchat.run/'
 		},
 	]
 </script>
@@ -157,6 +167,7 @@
 					width: 100%;
 					margin-top: 5px;
 					font-size: 15px;
+
 					.git-name {
 						margin-right: 4px;
 					}

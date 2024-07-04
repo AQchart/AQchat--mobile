@@ -48,6 +48,11 @@
 	 */
 	const htmlContent = ref('')
 
+	/**
+	 * 纯文本内容
+	 */
+	const textContent = ref('')
+
 	const userList = ref([])
 
 	/**
@@ -133,6 +138,10 @@
 	const showAt = () => {
 		showAtUser.value = !showAtUser.value
 	}
+	
+	const getText = () => {
+		return textContent.value
+	}
 
 	// 艾特占位符
 	const DEFAULT_AT = "#####AQChat####"
@@ -213,6 +222,7 @@
 			success: function (data : any) {
 				deltaList.value = data.delta.ops
 				htmlContent.value = data.html
+				textContent.value = data.text
 			}
 		})
 	}
@@ -263,6 +273,7 @@
 		if (editorCtx.value) {
 			atList.value = []
 			showAtUser.value = false
+			textContent.value = ''
 			editorCtx.value.clear()
 		}
 	}
@@ -276,7 +287,8 @@
 		rewriteFun,
 		getAtList,
 		showAt,
-		getCallUserList
+		getCallUserList,
+		getText
 	})
 </script>
 

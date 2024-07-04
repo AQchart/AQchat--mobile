@@ -226,12 +226,13 @@
 			})
 			return
 		}
-		sendMessage(0, msgStr.value, editorRef.value.getAtList(), editorRef.value.getCallUserList())
+		// let ext = editorRef.value.getAtList() + editorRef.value.getText()
+		sendMessage(msgStr.value, editorRef.value.getAtList(), editorRef.value.getCallUserList())
 	}
 
 
 	// 组装和发送消息
-	const sendMessage = (type : number, msg : string, ext : string, callUserList : []) => {
+	const sendMessage = (msg : string, ext : string, callUserList : []) => {
 		// const data = {
 		// 	roomId: appStore.roomInfo.roomId,
 		// 	msgType: type,
@@ -239,6 +240,10 @@
 		// 	msgId: snowFake.nextId()
 		// }
 		// sendMessageFun(data)
+		if(ext && ext != '') {
+			let text = editorRef.value.getText()
+			ext += `&${text}`
+		}
 		appStore.sendInfo(msg, MsgTypeEnum.TEXT, ext, callUserList)
 		msgStr.value = ''
 		editorRef.value.clear()
@@ -364,6 +369,9 @@
 
 			.send-msg-only {
 				bottom: 0;
+				::v-deep .im-container {
+					width: 520rpx;
+				}
 			}
 
 			.send-msg-other {

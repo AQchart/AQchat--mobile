@@ -3,6 +3,7 @@ import multiavatar from "@multiavatar/multiavatar/esm"
 import AQSender from '@/common/sockets/AQSender'
 import * as AQChatMSg from '@/common/sockets/protocol/AQChatMsgProtocol_pb'
 import { useAppStore } from '@/store/modules/app'
+import ChineseName from "@/common/ChineseName"
 
 
 export default () => {
@@ -12,6 +13,7 @@ export default () => {
 		userAvatar : string
 	}
 	const step = ref(1)
+	const chineseName = new ChineseName();
 	const userForm = reactive<UserForm>({
 		userName: '',
 		userAvatar: ''
@@ -37,6 +39,7 @@ export default () => {
 
 	const initAvatar = () => {
 		userForm.userAvatar = multiavatar(userForm.userName)
+		userForm.userName =  chineseName.random();
 	}
 
 	// 点击开启

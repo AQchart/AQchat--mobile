@@ -24,8 +24,7 @@
 				<view class="mem" v-for="member in appStore.memberList" :key="member.userId">
 					<u-row align="center" justify="space-between" gutter="0">
 						<u-col text-align="center" :span="4">
-							<img class="avatar" v-if="member.userId == 'AQChatHelper'" :src="member.userAvatar" alt="">
-							<div style="margin-left: 28%;" class="avatar" v-else v-html="member.userAvatar"></div>
+							<img class="avatar" :src="svgToDataURL(member.userAvatar)" alt="">
 						</u-col>
 						<u-col text-align="left" :span="8">
 							<span class="name">{{ member.userName }}</span>
@@ -47,6 +46,17 @@
 		let px = uni.getSystemInfoSync().windowHeight - 30;
 		return px
 	})
+	
+	const svgToDataURL = (html : any) => {
+		if(html.indexOf('png') != -1) {
+			return html
+		}
+		const toolElm = document.createElement('div')
+		toolElm.innerHTML = html
+		const svgElement = toolElm.firstChild
+		if (!svgElement) return null
+		return 'data:image/svg+xml;base64,' + btoa(new XMLSerializer().serializeToString(svgElement))
+	}
 
 	const { leaveRoomFun, logoutFun } = useRoom()
 
