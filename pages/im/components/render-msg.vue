@@ -31,7 +31,8 @@
 		</view>
 		<view class="shade" v-show="showShade" @tap="hidePop">
 			<view class="pop" :style="popStyle" :class="{'show':showPop}">
-				<view @click="recallMsgFun">撤回</view>
+				<view v-if="message?.user?.userId != appStore.userInfo.userId" @click="recallMsgFun">撤回</view>
+				<view v-if="message.msgType == MsgTypeEnum.TEXT" @click="copyMsg">复制</view>
 			</view>
 		</view>
 	</view>
@@ -88,6 +89,19 @@
 		// #endif
 	})
 	
+	// 复制
+	const copyMsg = () => {
+		uni.setClipboardData({
+			data: message.msg,
+			showToast: false,
+			success() {
+				uni.showToast({
+					title: '复制成功',
+					icon: 'none'
+				});
+			}
+		})
+	}
 	
 	
 	const svgToDataURL = (html : any) => {
@@ -135,9 +149,9 @@
 	/* 长按监听 */
 	const onLongPress = (e : any) => {
 		console.log("长按");
-		if (message?.user?.userId != appStore.userInfo.userId) {
-			return
-		}
+		// if (message?.user?.userId != appStore.userInfo.userId) {
+		// 	return
+		// }
 		let [touches, style, index] = [e.touches[0], "", e.currentTarget.dataset.index];
 
 		/* 因 非H5端不兼容 style 属性绑定 Object ，所以拼接字符 */
