@@ -19,7 +19,7 @@
 				<view class="name" :style="{textAligh: currentUser.userId == message.user.userId ? 'right': 'left'}">
 					{{ message.user.userName }}
 				</view>
-				<view class="message-box"
+				<view ref="messageRef" class="message-box"
 					:class="currentUser.userId == message.user.userId ? 'right-after': 'left-after'">
 					<component :is="getMessageType()" v-bind="getProps" @longpress.native="onLongPress"
 						@tap.native="listTap">
@@ -31,7 +31,7 @@
 		</view>
 		<view class="shade" v-show="showShade" @tap="hidePop">
 			<view class="pop" :style="popStyle" :class="{'show':showPop}">
-				<view v-if="message.user.userId == appStore.userInfo.userId" @click="recallMsgFun">撤回</view>
+				<view v-if="message?.user?.userId == appStore.userInfo.userId" @click="recallMsgFun">撤回</view>
 				<view v-if="message.msgType == MsgTypeEnum.TEXT" @click="copyMsg">复制</view>
 			</view>
 		</view>
@@ -77,6 +77,8 @@
 	const showPop = ref(false)
 	/* 弹窗定位样式 */
 	const popStyle = ref("")
+	
+	const messageRef = ref<HTMLElement>()
 
 	onMounted(() => {
 		getWindowSize();
@@ -91,8 +93,9 @@
 	
 	// 复制
 	const copyMsg = () => {
+		console.log(messageRef.value.$el)
 		uni.setClipboardData({
-			data: message.msg,
+			data: messageRef.value?.$el.innerText,
 			showToast: false,
 			success() {
 				uni.showToast({
