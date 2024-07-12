@@ -31,7 +31,7 @@
 		</view>
 		<view class="shade" v-show="showShade" @tap="hidePop">
 			<view class="pop" :style="popStyle" :class="{'show':showPop}">
-				<view v-if="message?.user?.userId != appStore.userInfo.userId" @click="recallMsgFun">撤回</view>
+				<view v-if="message.user.userId == appStore.userInfo.userId" @click="recallMsgFun">撤回</view>
 				<view v-if="message.msgType == MsgTypeEnum.TEXT" @click="copyMsg">复制</view>
 			</view>
 		</view>
@@ -137,6 +137,9 @@
 
 	// 撤回消息
 	const recallMsgFun = () => {
+		if(message.user.userId != appStore.userInfo.userId) {
+			return
+		}
 		let model = new AQChatMSg.default.RecallMsgCmd();
 		model.setRoomid(appStore.roomInfo.roomId);
 		model.setMsgid(message.msgId);
